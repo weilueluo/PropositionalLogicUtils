@@ -1,9 +1,17 @@
 package symbols;
 
-import exceptions.InvalidSymbolException;
+public abstract class Symbol {
 
-public interface Symbol {
+    public String TRUE = "T",
+                FALSE = "F",
+                NEG = "~",
+                LBRACKET = "(",
+                RBRACKET = ")",
+                IMPLIES = "->",
+                IFF = "<->",
+                AND = "/\\",
+                OR = "\\/";
 
-    boolean equals(String other);
-
+    public Symbol() {
+    } // empty
 }

@@ -1,6 +1,6 @@
 package exceptions;
 
-public class InvalidSymbolException extends Exception {
+public class InvalidSymbolException extends RuntimeException {
 
     public InvalidSymbolException() {
         super();
