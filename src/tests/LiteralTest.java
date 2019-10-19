@@ -120,16 +120,16 @@ public class LiteralTest {
     @Test
     public void testSingleton() {
         literal = Literal.factory("T");
-        assertTrue(literal == Literal.factory("T"));
+        assertSame(literal, Literal.factory("T"));
 
         literal = Literal.factory("~T");
-        assertTrue(literal == Literal.factory("~T"));
+        assertSame(literal, Literal.factory("~T"));
 
         literal = Literal.factory("F");
-        assertTrue(literal == Literal.factory("F"));
+        assertSame(literal, Literal.factory("F"));
 
         literal = Literal.factory("~F");
-        assertTrue(literal == Literal.factory("~F"));
+        assertSame(literal, Literal.factory("~F"));
     }
 
     @Test
@@ -141,17 +141,32 @@ public class LiteralTest {
         literal = Literal.factory("~             ~ CHOPSTICK                     ");
     }
 
-    @Test
+    @Test(expected = InvalidSymbolException.class)
     public void testFactoryInvalidLiteral() {
-        try {
-            literal = Literal.factory("Wate#r");
-            literal = Literal.factory("~3MAYDAY");
-            literal = Literal.factory("~ wss ~AppleOnTheGround");
-            literal = Literal.factory("~~ ~~ ~x~~   MillionBananaKingdom");
-            literal = Literal.factory("~             ~ CHOPSTICK       x  ");
-            fail("Initialized invalid symbol");
-        } catch (InvalidSymbolException e) {
-            // pass
-        }
+        literal = Literal.factory("Wate#r");
     }
+
+    @Test(expected = InvalidSymbolException.class)
+    public void testFactoryInvalidLiteral1() {
+        literal = Literal.factory("~3MAYDAY");
+    }
+
+    @Test(expected = InvalidSymbolException.class)
+    public void testFactoryInvalidLiteral2() {
+        literal = Literal.factory("~ wss ~AppleOnTheGround");
+    }
+
+    @Test(expected = InvalidSymbolException.class)
+    public void testFactoryInvalidLiteral3() {
+        literal = Literal.factory("~~ ~~ ~x~~   MillionBananaKingdom");
+    }
+
+    @Test(expected = InvalidSymbolException.class)
+    public void testFactoryInvalidLiteral4() {
+        literal = Literal.factory("~             ~ CHOPSTICK       x  ");
+    }
+
+
+
+
 }
