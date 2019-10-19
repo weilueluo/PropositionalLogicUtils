@@ -1,4 +1,4 @@
-package exceptions;
+package core.exceptions;
 
 public class InvalidSymbolException extends RuntimeException {
 

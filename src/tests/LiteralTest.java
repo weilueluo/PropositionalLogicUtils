@@ -1,8 +1,8 @@
 package tests;
 
-import exceptions.InvalidSymbolException;
+import core.exceptions.InvalidSymbolException;
+import core.symbols.Literal;
 import org.junit.Test;
-import symbols.Literal;
 
 import static org.junit.Assert.*;
 
@@ -10,17 +10,17 @@ public class LiteralTest {
 
     private Literal literal;
 
-    @org.junit.Test
+    @Test
     public void assign() {
         // test not negated literal
-        literal = new Literal("p");
+        literal = Literal.factory("p");
         literal.assign(true);
         assertTrue(literal.truthValue());
         literal.assign(false);
         assertFalse(literal.truthValue());
 
         // test negated literal
-        literal = new Literal("~p");
+        literal = Literal.factory("~p");
         literal.assign(true);
         assertFalse(literal.truthValue());
         literal.assign(false);
@@ -29,68 +29,129 @@ public class LiteralTest {
 
     @Test
     public void truthValue() {
-        literal = new Literal("literal");
+        literal = Literal.factory("literal");
         literal.assign(true);
         assertTrue(literal.truthValue());
         literal.assign(false);
         assertFalse(literal.truthValue());
 
-        literal = new Literal("~literal");
+        literal = Literal.factory("~literal");
         literal.assign(true);
         assertFalse(literal.truthValue());
         literal.assign(false);
         assertTrue(literal.truthValue());
 
-        literal = new Literal("T");
+        literal = Literal.factory("T");
         assertTrue(literal.truthValue());
-        literal = new Literal("F");
+        literal = Literal.factory("F");
         assertFalse(literal.truthValue());
     }
 
-    @org.junit.Test
+    @Test
     public void isContradiction() {
-        literal = new Literal("F");
+        literal = Literal.factory("F");
         assertTrue(literal.isContradiction());
-        literal = new Literal("~F");
+        literal = Literal.factory("~F");
         assertFalse(literal.isContradiction());
     }
 
-    @org.junit.Test
+    @Test
     public void isTautology() {
-        literal = new Literal("T");
+        literal = Literal.factory("T");
         assertTrue(literal.isTautology());
-        literal = new Literal("~T");
+        literal = Literal.factory("~T");
         assertFalse(literal.isTautology());
     }
 
-    @org.junit.Test
+    @Test
     public void isNegated() {
 
         // test contradiction
-        literal = new Literal("F");
+        literal = Literal.factory("F");
         assertFalse(literal.isNegated());
 
         // test tautology
-        literal = new Literal("T");
+        literal = Literal.factory("T");
         assertFalse(literal.isNegated());
 
+        // test negated contradiction
+        literal = Literal.factory("~F");
+        assertTrue(literal.isNegated());
+
+        // test negated tautology
+        literal = Literal.factory("~T");
+        assertTrue(literal.isNegated());
+
         // test positive
-        literal = new Literal("apple");
+        literal = Literal.factory("apple");
         assertFalse(literal.isNegated());
 
         // test negated
-        literal = new Literal("~apple");
+        literal = Literal.factory("~apple");
+        assertTrue(literal.isNegated());
+
+        // test more negation
+        literal = Literal.factory("~~banana");
+        assertFalse(literal.isNegated());
+        assertTrue(literal.rawEquals(Literal.factory("banana"))); // check if negation is checked
+        literal = Literal.factory("~~~banana");
+        assertTrue(literal.rawEquals(Literal.factory("banana"))); // check if negation is checked
         assertTrue(literal.isNegated());
 
     }
 
-    @org.junit.Test
+    @Test
     public void rawEquals() {
-        literal = new Literal("chicken");
-        assertTrue(literal.rawEquals(new Literal("chicken")));
+        literal = Literal.factory("chicken");
+        assertTrue(literal.rawEquals(Literal.factory("chicken")));
+        literal = Literal.factory("~chicken");
+        assertTrue(literal.rawEquals(Literal.factory("chicken")));
+
     }
 
-    @org.junit.Test
+    @Test
     public void testEquals() {
+        literal = Literal.factory("chicken");
+        assertTrue(literal.equals(Literal.factory("chicken")));
+        literal = Literal.factory("~chicken");
+        assertTrue(literal.equals(Literal.factory("~chicken")));
+    }
+
+    @Test
+    public void testSingleton() {
+        literal = Literal.factory("T");
+        assertTrue(literal == Literal.factory("T"));
+
+        literal = Literal.factory("~T");
+        assertTrue(literal == Literal.factory("~T"));
+
+        literal = Literal.factory("F");
+        assertTrue(literal == Literal.factory("F"));
+
+        literal = Literal.factory("~F");
+        assertTrue(literal == Literal.factory("~F"));
+    }
+
+    @Test
+    public void testFactoryValidLiteral() {
+        literal = Literal.factory("Water");
+        literal = Literal.factory("~MAYDAY");
+        literal = Literal.factory("~~AppleOnTheGround");
+        literal = Literal.factory("~~ ~~ ~~~~   MillionBananaKingdom");
+        literal = Literal.factory("~             ~ CHOPSTICK                     ");
+    }
+
+    @Test
+    public void testFactoryInvalidLiteral() {
+        try {
+            literal = Literal.factory("Wate#r");
+            literal = Literal.factory("~3MAYDAY");
+            literal = Literal.factory("~ wss ~AppleOnTheGround");
+            literal = Literal.factory("~~ ~~ ~x~~   MillionBananaKingdom");
+            literal = Literal.factory("~             ~ CHOPSTICK       x  ");
+            fail("Initialized invalid symbol");
+        } catch (InvalidSymbolException e) {
+            // pass
+        }
     }
 }

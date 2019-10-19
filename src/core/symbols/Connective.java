@@ -1,6 +1,6 @@
-package symbols;
+package core.symbols;
 
-import exceptions.InvalidSymbolException;
+import core.exceptions.InvalidSymbolException;
 
 public class Connective extends Symbol {
 
