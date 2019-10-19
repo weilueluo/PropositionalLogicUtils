@@ -78,8 +78,8 @@ public class Literal extends Symbol {
             throw new InvalidSymbolException("Null is not a valid literal");
         }
 
-        // remove all spaces
-        str = str.replaceAll("\\s", "");
+        // remove space
+        str = str.strip();
 
         // check empty
         if (str.isEmpty()) {
@@ -91,9 +91,14 @@ public class Literal extends Symbol {
         while (str.startsWith(NEG)) {
             isNegated = !isNegated;
             str = str.substring(NEG.length());
+            str = str.strip();
         }
 
         // str will be raw here
+
+        if (str.isEmpty()) {
+            throw new InvalidSymbolException("Given raw literal is empty");
+        }
 
         // check if contains invalid character in raw literal
         if (!isAllLetters(str)) {
