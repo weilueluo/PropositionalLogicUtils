@@ -13,10 +13,10 @@ public class Literal extends Symbol {
 
     static {
         // create singletons
-        SINGLETON_TAUTOLOGY = new Literal(TAUTOLOGY, false);
-        SINGLETON_NEGATED_TAUTOLOGY = new Literal(TAUTOLOGY, true);
-        SINGLETON_CONTRADICTION = new Literal(CONTRADICTION, false);
-        SINGLETON_NEGATED_CONTRADICTION = new Literal(CONTRADICTION, true);
+        SINGLETON_TAUTOLOGY = new Literal(TAUTOLOGY, TAUTOLOGY, false);
+        SINGLETON_NEGATED_TAUTOLOGY = new Literal(TAUTOLOGY, TAUTOLOGY, true);
+        SINGLETON_CONTRADICTION = new Literal(CONTRADICTION, CONTRADICTION, false);
+        SINGLETON_NEGATED_CONTRADICTION = new Literal(CONTRADICTION, CONTRADICTION, true);
 
         // assign values
         SINGLETON_TAUTOLOGY.assign(true);
@@ -35,7 +35,7 @@ public class Literal extends Symbol {
                 SINGLETON_NEGATED_CONTRADICTION.isAssigned = SINGLETON_NEGATED_TAUTOLOGY.isAssigned = true;
     }
 
-    private String rawLiteral, fullLiteral;
+    private String rawLiteral, fullLiteral, unprocessedLiteral;
     private boolean isNegated, isAssigned, truthValue, isTautology, isContradiction;
 
     private Literal() {
@@ -44,31 +44,32 @@ public class Literal extends Symbol {
     /**
      * The core literal constructor for string
      *
-     * @param rawValidFormula the literal in String type, must be valid, non-tautology, non-contradiction and striped
-     * @param isNegated       if this literal is negated
+     * @param rawLiteral the literal in String type, must be valid, non-tautology, non-contradiction and striped
+     * @param isNegated  if this literal is negated
      */
-    private Literal(String rawValidFormula, boolean isNegated) {
+    private Literal(String unprocessedLiteral, String rawLiteral, boolean isNegated) {
 
-        this.rawLiteral = rawValidFormula;
+        this.unprocessedLiteral = unprocessedLiteral;
+        this.rawLiteral = rawLiteral;
 
         // full literal is literal without removing negated symbol if exists
         if (isNegated) {
-            this.fullLiteral = NEG + rawValidFormula;
+            this.fullLiteral = NEG + rawLiteral;
         } else {
-            this.fullLiteral = rawValidFormula;
+            this.fullLiteral = rawLiteral;
         }
 
         this.isNegated = isNegated;
         this.isAssigned = this.isTautology = this.isContradiction = false;
-
     }
 
     /**
-     * This method return a Literal Object if success
+     * This method return a Literal Object if parsing passed
+     * This method sanitize input string before passing to actually constructor
      *
-     * @param str
+     * @param str the input literal string
      * @return Literal Object
-     * @throws InvalidSymbolException if null/empty/negation only/invalid character
+     * @throws InvalidSymbolException if null/empty/negation only/un-closed bracket/invalid character
      */
     @NotNull
     @Contract("null -> fail")
@@ -78,41 +79,108 @@ public class Literal extends Symbol {
             throw new InvalidSymbolException("Null is not a valid literal");
         }
 
+        String unprocessedStr = str;
+
         // remove space
         str = str.strip();
 
         // check empty
         if (str.isEmpty()) {
-            throw new InvalidSymbolException("Given literal is empty");
+            throw new InvalidSymbolException("Given literal is blank");
         }
 
-        // parse negation
+        // now parse negations and brackets
         boolean isNegated = false;
-        while (str.startsWith(NEG)) {
-            isNegated = !isNegated;
-            str = str.substring(NEG.length());
-            str = str.strip();
+        char[] chars = str.toCharArray();
+
+        // for looping, this should later point to start of raw literal
+        int startPointer = 0;
+
+        // used to check if ends with right bracket, this should later point to end of raw literal
+        int endPointer = chars.length - 1;
+
+        // loop to ensure multiple brackets/negation sign are checked and removed
+        while (startPointer < chars.length) {
+            if (chars[startPointer] == ' ') {  // ignore space
+                startPointer++;
+                continue;
+            }
+
+            char[] negChars = NEG.toCharArray();
+            // if starts with negation then negate the negation sign and increase start pointer
+            if (charArrayStartsWith(chars, negChars, startPointer)) {
+                isNegated = !isNegated;
+                startPointer += negChars.length;
+                continue;
+            }
+
+            // then we check if starts with left bracket
+            char[] braChars = LBRACKET.toCharArray();
+
+            // if starts with left bracket, we check if ends with right bracket and increase pointer
+            if (charArrayStartsWith(chars, braChars, startPointer)) {
+
+                // then we check if ends with right bracket
+                while (endPointer > startPointer && chars[endPointer] == ' ') endPointer--; // skip spaces
+
+                boolean endsWithRBracket = true;
+                char[] rBraChars = RBRACKET.toCharArray();
+                for (int i = rBraChars.length - 1; i >= 0; i--) {
+                    if (endPointer - i < 0 || chars[endPointer - i] != rBraChars[i]) {
+                        endsWithRBracket = false;
+                        break;
+                    }
+                }
+
+                // throw exception if not ends with right bracket
+                if (!endsWithRBracket) {
+                    throw new InvalidSymbolException(String.format("Literal \"%s\"\'s bracket is not enclosed properly",
+                            unprocessedStr));
+                }
+
+                startPointer += braChars.length;
+                endPointer -= rBraChars.length;
+                continue;
+
+            } // if (startsWithBracket)
+
+            // if we reach here that means starts neither with negation nor right bracket
+            // so we can terminate the loop
+            break;
+        } // while (startPointer < chars.length)
+
+        // remove trailing space
+        while(endPointer > 0 && chars[endPointer] == ' ') endPointer--;
+
+        // check empty
+        if (endPointer < startPointer) {
+            throw new InvalidSymbolException(String.format("Literal \"%s\"\'s raw is blank", unprocessedStr));
         }
 
-        // str will be raw here
+        /*
+         * raw literal will be between pointers here
+         */
 
-        if (str.isEmpty()) {
-            throw new InvalidSymbolException("Given raw literal is empty");
+        String rawLiteral = String.valueOf(chars, startPointer, endPointer - startPointer + 1);
+
+        if (rawLiteral.isEmpty()) {
+            throw new InvalidSymbolException(String.format("Given literal \"%s\"\' raw form is empty", unprocessedStr));
         }
 
         // check if contains invalid character in raw literal
-        if (!isAllLetters(str)) {
-            throw new InvalidSymbolException(String.format("Raw literal must contains letters only, not \"%s\"", str));
+        if (!isAllLetters(rawLiteral)) {
+            throw new InvalidSymbolException(String.format("Given literal \"%s\"\'s raw form must contains letters " +
+                    "only, not \"%s\"", unprocessedStr, rawLiteral));
         }
 
         // return singleton if tautology/contradiction
-        if (str.equals(TAUTOLOGY)) {
+        if (rawLiteral.equals(TAUTOLOGY)) {
             if (isNegated) {
                 return SINGLETON_NEGATED_TAUTOLOGY;
             } else {
                 return SINGLETON_TAUTOLOGY;
             }
-        } else if (str.equals(CONTRADICTION)) {
+        } else if (rawLiteral.equals(CONTRADICTION)) {
             if (isNegated) {
                 return SINGLETON_NEGATED_CONTRADICTION;
             } else {
@@ -120,7 +188,7 @@ public class Literal extends Symbol {
             }
         }
 
-        return new Literal(str, isNegated);
+        return new Literal(unprocessedStr, rawLiteral, isNegated);
     }
 
     @Contract("null -> false")
@@ -136,6 +204,44 @@ public class Literal extends Symbol {
             }
         }
         return true;
+    }
+
+    @Contract("null, _, _ -> fail; !null, null, _ -> fail")
+    private static boolean charArrayStartsWith(char[] chars, char[] prefix, int startIndex) {
+        if (chars == null || prefix == null) {
+            throw new InvalidSymbolException("Given char array is null");
+        }
+
+        if (startIndex < 0) {
+            throw new InvalidSymbolException(String.format("Given startIndex: \"%s\" is less than 0", startIndex));
+        }
+
+        if (chars.length - startIndex < prefix.length) {
+            return false;
+        }
+
+        for (int i = 0; i < prefix.length; i++) {
+            if (chars[startIndex + i] == ' ') {
+                continue;
+            }
+            if (chars[startIndex + i] != prefix[i]) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public String getRaw() {
+        return this.rawLiteral;
+    }
+
+    public String getFull() {
+        return this.fullLiteral;
+    }
+
+    public String getUnprocessedLiteral() {
+        return this.unprocessedLiteral;
     }
 
     // this will override previous value if it is not tautology or contradiction
@@ -155,8 +261,12 @@ public class Literal extends Symbol {
             throw new IllegalStateException(String.format("Access truth value before assignment for literal: \"%s\"",
                     this.fullLiteral));
         }
-
         return this.truthValue;
+    }
+
+    private Boolean truthValueOrNull() {
+        if (!this.isAssigned) return null;
+        else return this.truthValue;
     }
 
     public boolean isContradiction() {
@@ -177,13 +287,14 @@ public class Literal extends Symbol {
 
     public boolean equals(Literal other) {
         return this.rawLiteral.equals(other.rawLiteral)
-                && this.isNegated == other.isNegated;
+                && this.isNegated == other.isNegated
+                && this.truthValueOrNull() == other.truthValueOrNull();
     }
 
     public String toString() {
-        return String.format("Full literal: %s, raw literal: %s, negated: %s, " +
+        return String.format("Unprocessed String: %s, full literal: %s, raw literal: %s, negated: %s, " +
                         "tautology: %s, contradiction: %s, assigned: %s",
-                this.fullLiteral, this.rawLiteral, this.isNegated, this.isTautology,
+                this.unprocessedLiteral, this.fullLiteral, this.rawLiteral, this.isNegated, this.isTautology,
                 this.isContradiction, this.isAssigned ? this.truthValue : "null");
     }
 

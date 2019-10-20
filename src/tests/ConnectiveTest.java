@@ -3,16 +3,17 @@ package tests;
 import core.exceptions.InvalidSymbolException;
 import core.symbols.Connective;
 import core.symbols.Symbol;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class ConnectiveTest {
+class ConnectiveTest {
 
     private Connective conn;
 
     @Test
-    public void normalFactory() {
+    void normalFactory() {
         conn = Connective.factory(Symbol.IFF);
         assertEquals(conn.toString(), Symbol.IFF);
 
@@ -38,38 +39,14 @@ public class ConnectiveTest {
         assertEquals(conn.toString(), Symbol.OR);
     }
 
-    @Test(expected = InvalidSymbolException.class)
-    public void invalidFactory1() {
-        conn = Connective.factory(Symbol.NEG);
-    }
-
-    @Test(expected = InvalidSymbolException.class)
-    public void invalidFactory2() {
-        conn = Connective.factory(Symbol.TAUTOLOGY);
-    }
-
-    @Test(expected = InvalidSymbolException.class)
-    public void invalidFactory3() {
-        conn = Connective.factory(Symbol.CONTRADICTION);
-    }
-
-    @Test(expected = InvalidSymbolException.class)
-    public void invalidFactory4() {
-        conn = Connective.factory("-  > <->");
-    }
-
-    @Test(expected = InvalidSymbolException.class)
-    public void invalidFactory5() {
-        conn = Connective.factory("-->");
-    }
-
-    @Test(expected = InvalidSymbolException.class)
-    public void invalidFactory6() {
-        conn = Connective.factory("//\\");
-    }
-
-    @Test(expected = InvalidSymbolException.class)
-    public void invalidFactory7() {
-        conn = Connective.factory("\\///");
+    @Test
+    void invalidFactory() {
+        assertThrows(InvalidSymbolException.class, () -> Connective.factory(Symbol.NEG));
+        assertThrows(InvalidSymbolException.class, () -> Connective.factory(Symbol.TAUTOLOGY));
+        assertThrows(InvalidSymbolException.class, () -> Connective.factory(Symbol.CONTRADICTION));
+        assertThrows(InvalidSymbolException.class, () -> Connective.factory("-  > <->"));
+        assertThrows(InvalidSymbolException.class, () -> Connective.factory("-->"));
+        assertThrows(InvalidSymbolException.class, () -> Connective.factory("//\\"));
+        assertThrows(InvalidSymbolException.class, () -> Connective.factory("\\///"));
     }
 }

@@ -2,16 +2,18 @@ package tests;
 
 import core.exceptions.InvalidSymbolException;
 import core.symbols.Literal;
-import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
-public class LiteralTest {
+class LiteralTest {
 
     private Literal literal;
 
     @Test
-    public void assign() {
+    void assign() {
         // test not negated literal
         literal = Literal.factory("p");
         literal.assign(true);
@@ -28,7 +30,7 @@ public class LiteralTest {
     }
 
     @Test
-    public void truthValue() {
+    void truthValue() {
         literal = Literal.factory("literal");
         literal.assign(true);
         assertTrue(literal.truthValue());
@@ -48,7 +50,7 @@ public class LiteralTest {
     }
 
     @Test
-    public void isContradiction() {
+    void isContradiction() {
         literal = Literal.factory("F");
         assertTrue(literal.isContradiction());
         literal = Literal.factory("~F");
@@ -56,7 +58,7 @@ public class LiteralTest {
     }
 
     @Test
-    public void isTautology() {
+    void isTautology() {
         literal = Literal.factory("T");
         assertTrue(literal.isTautology());
         literal = Literal.factory("~T");
@@ -64,8 +66,7 @@ public class LiteralTest {
     }
 
     @Test
-    public void isNegated() {
-
+    void isNegated() {
         // test contradiction
         literal = Literal.factory("F");
         assertFalse(literal.isNegated());
@@ -98,75 +99,138 @@ public class LiteralTest {
         assertTrue(literal.rawEquals(Literal.factory("banana"))); // check if negation is checked
         assertTrue(literal.isNegated());
 
+        // test negation with bracket
+        literal = Literal.factory("~(~banana)");
+        assertFalse(literal.isNegated());
+        assertTrue(literal.rawEquals(Literal.factory("banana"))); // check if negation is checked
+        literal = Literal.factory("(~~(~banana))");
+        assertTrue(literal.rawEquals(Literal.factory("(banana)"))); // check if negation is checked
+        assertTrue(literal.isNegated());
     }
 
     @Test
-    public void rawEquals() {
+    void rawEquals() {
         literal = Literal.factory("chicken");
         assertTrue(literal.rawEquals(Literal.factory("chicken")));
         literal = Literal.factory("~chicken");
         assertTrue(literal.rawEquals(Literal.factory("chicken")));
 
+        literal = Literal.factory("(((((((chicken)))))))");
+        assertTrue(literal.rawEquals(Literal.factory("chicken")));
+        literal = Literal.factory("(~(chicken))");
+        assertTrue(literal.rawEquals(Literal.factory("chicken")));
+        literal = Literal.factory("~~~(what)");
+        assertTrue(literal.rawEquals(Literal.factory("((((what))))")));
+        literal = Literal.factory("~~~~~~(~~~~(~~~(~~chicken)))");
+        assertTrue(literal.rawEquals(Literal.factory("chicken")));
+        literal = Literal.factory("(~(~~~~((~~~magic))))");
+        assertTrue(literal.rawEquals(Literal.factory("magic")));
     }
 
     @Test
-    public void testEquals() {
-        literal = Literal.factory("chicken");
+    void testEquals() {
+        literal = Literal.factory("chicken  ");
         assertTrue(literal.equals(Literal.factory("chicken")));
         literal = Literal.factory("~chicken");
         assertTrue(literal.equals(Literal.factory("~chicken")));
+        literal = Literal.factory("~~~~woof");
+        assertTrue(literal.equals(Literal.factory("woof")));
+        literal = Literal.factory("(((  (((((((mindless))))))  ))))           ");
+        assertTrue(literal.equals(Literal.factory("   mindless   ")));
+        literal = Literal.factory("~~( ~~(~~  (~~(~~zero)) ))");
+        assertTrue(literal.equals(Literal.factory("zero")));
+        literal = Literal.factory("~~ ~~        ~panda");
+        assertTrue(literal.equals(Literal.factory("~panda")));
+        literal = Literal.factory("~(((~~~(~~~(((monkey)))  ))))");
+        assertTrue(literal.equals(Literal.factory("~monkey")));
+        literal = Literal.factory("EndOfLife");
+        assertTrue(literal.equals(Literal.factory("(~~~~EndOfLife)          ")));
+        literal = Literal.factory("~(           ((~~~BorN)))");
+        assertTrue(literal.equals(Literal.factory("BorN")));
     }
 
     @Test
-    public void testSingleton() {
-        literal = Literal.factory("T");
-        assertSame(literal, Literal.factory("T"));
-
-        literal = Literal.factory("~T");
-        assertSame(literal, Literal.factory("~T"));
-
-        literal = Literal.factory("F");
-        assertSame(literal, Literal.factory("F"));
-
-        literal = Literal.factory("~F");
-        assertSame(literal, Literal.factory("~F"));
+    void testFailEquals() {
+        literal = Literal.factory("chicken");
+        assertFalse(literal.equals(Literal.factory("~chicken")));
+        literal = Literal.factory("~chicken");
+        assertFalse(literal.equals(Literal.factory("chicken")));
+        literal = Literal.factory("~~~woof");
+        assertFalse(literal.equals(Literal.factory("woof")));
+        literal = Literal.factory("(((  (((((((mindless))))))  ))))           ");
+        assertFalse(literal.equals(Literal.factory(" ~  mindless   ")));
+        literal = Literal.factory("~~( ~~(~~  (~~(~~zero)) ))");
+        assertFalse(literal.equals(Literal.factory("~zero")));
+        literal = Literal.factory("~~ ~~        ~~panda");
+        assertFalse(literal.equals(Literal.factory("~panda")));
+        literal = Literal.factory("~~(((~~~(~~~(((monkey)))  ))))");
+        assertFalse(literal.equals(Literal.factory("~monkey")));
+        literal = Literal.factory("~EndOfLife");
+        assertFalse(literal.equals(Literal.factory("(~~~~EndOfLife)          ")));
+        literal = Literal.factory("~(           ((~~BorN)))");
+        assertFalse(literal.equals(Literal.factory("BorN")));
     }
 
     @Test
-    public void testFactoryValidLiteral() {
+    void testFactoryValidLiteral() {
         literal = Literal.factory("Water");
         literal = Literal.factory("~MAYDAY");
         literal = Literal.factory("~~AppleOnTheGround");
         literal = Literal.factory("~~ ~~ ~~~~   MillionBananaKingdom");
         literal = Literal.factory("~             ~ CHOPSTICK                     ");
+        literal = Literal.factory("((((immunity))))");
+        literal = Literal.factory("~~~(~~(~~WHY))");
+        literal = Literal.factory("( ~   (~~~ (((~(( ~~((((   (  FIELD  ))))))          ))))))    ");
+        literal = Literal.factory("( ~(~~ ( ~ ~ ( ~ ~ STRANGE ) ) ) ) ");
+        literal = Literal.factory("(NORM)");
+        literal = Literal.factory("(~TENSE)");
+        literal = Literal.factory("~~~~~~((SPACe))");
     }
 
-    @Test(expected = InvalidSymbolException.class)
-    public void testFactoryInvalidLiteral() {
-        literal = Literal.factory("Wate#r");
+    @Test
+    void testFactoryInvalidLiteral() {
+        assertThrows(InvalidSymbolException.class, () -> Literal.factory("be ar"));
+        assertThrows(InvalidSymbolException.class, () -> Literal.factory("water#r"));
+        assertThrows(InvalidSymbolException.class, () -> Literal.factory("~3MAYDAY"));
+        assertThrows(InvalidSymbolException.class, () -> Literal.factory("~ wss ~AppleOnTheGround"));
+        assertThrows(InvalidSymbolException.class, () -> Literal.factory("~~ ~~ ~x~~   MillionBananaKingdom"));
+        assertThrows(InvalidSymbolException.class, () -> Literal.factory("~             ~ CHOPSTICK       x  "));
+        assertThrows(InvalidSymbolException.class, () -> Literal.factory("~hEY~"));
+        assertThrows(InvalidSymbolException.class, () -> Literal.factory("(UNDO))"));
+        assertThrows(InvalidSymbolException.class, () -> Literal.factory("((DO)"));
+        assertThrows(InvalidSymbolException.class, () -> Literal.factory("(a)()"));
+        assertThrows(InvalidSymbolException.class, () -> Literal.factory("~"));
+        assertThrows(InvalidSymbolException.class, () -> Literal.factory("~~()"));
+        assertThrows(InvalidSymbolException.class, () -> Literal.factory("(((((())))))"));
+        assertThrows(InvalidSymbolException.class, () -> Literal.factory("(~)"));
+        assertThrows(InvalidSymbolException.class, () -> Literal.factory("~~()()~~"));
     }
 
-    @Test(expected = InvalidSymbolException.class)
-    public void testFactoryInvalidLiteral1() {
-        literal = Literal.factory("~3MAYDAY");
+    @Test
+    void getRaw() {
+        literal = Literal.factory("hey");
+        assertEquals(literal.getRaw(), "hey");
+        literal = Literal.factory("~hey");
+        assertEquals(literal.getRaw(), "hey");
+        literal = Literal.factory("~~~hey");
+        assertEquals(literal.getRaw(), "hey");
+        literal = Literal.factory("(((Ah)))");
+        assertEquals(literal.getRaw(), "Ah");
+        literal = Literal.factory("(man)");
+        assertEquals(literal.getRaw(), "man");
+        literal = Literal.factory("((((justInTime))))");
+        assertEquals(literal.getRaw(), "justInTime");
+        literal = Literal.factory("~~~~~~longStuff");
+        assertEquals(literal.getRaw(), "longStuff");
+        literal = Literal.factory("~((~~~~(~(~~complex))))");
+        assertEquals(literal.getRaw(), "complex");
     }
 
-    @Test(expected = InvalidSymbolException.class)
-    public void testFactoryInvalidLiteral2() {
-        literal = Literal.factory("~ wss ~AppleOnTheGround");
+    @Test
+    void getFull() {
     }
 
-    @Test(expected = InvalidSymbolException.class)
-    public void testFactoryInvalidLiteral3() {
-        literal = Literal.factory("~~ ~~ ~x~~   MillionBananaKingdom");
+    @Test
+    void getUnprocessedLiteral() {
     }
-
-    @Test(expected = InvalidSymbolException.class)
-    public void testFactoryInvalidLiteral4() {
-        literal = Literal.factory("~             ~ CHOPSTICK       x  ");
-    }
-
-
-
-
 }
