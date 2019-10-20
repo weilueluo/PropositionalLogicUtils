@@ -33,12 +33,12 @@ public class Literal extends Symbol {
 
         this.isNegated = isNegated;
 
-        if (rawLiteral.equals(TAUTOLOGY)) {
+        if (rawLiteral.equals(Character.toString(TAUTOLOGY))) {
             this.isTautology = !isNegated;
             this.isContradiction = isNegated;
             this.truthValue = !isNegated;
 
-        } else if (rawLiteral.equals(CONTRADICTION)) {
+        } else if (rawLiteral.equals(Character.toString(CONTRADICTION))) {
             this.isContradiction = !isNegated;
             this.isTautology = isNegated;
             this.truthValue = isNegated;
@@ -92,40 +92,29 @@ public class Literal extends Symbol {
                 continue;
             }
 
-            char[] negChars = NEG.toCharArray();
             // if starts with negation then negate the negation sign and increase start pointer
-            if (charArrayStartsWith(chars, negChars, startPointer)) {
+            if (chars[startPointer] == NEG) {
                 isNegated = !isNegated;
-                startPointer += negChars.length;
+                startPointer += 1;
                 continue;
             }
 
             // then we check if starts with left bracket
-            char[] braChars = LBRACKET.toCharArray();
 
             // if starts with left bracket, we check if ends with right bracket and increase pointer
-            if (charArrayStartsWith(chars, braChars, startPointer)) {
+            if (chars[startPointer] == LBRACKET) {
 
                 // then we check if ends with right bracket
                 while (endPointer > startPointer && chars[endPointer] == ' ') endPointer--; // skip spaces
 
-                boolean endsWithRBracket = true;
-                char[] rBraChars = RBRACKET.toCharArray();
-                for (int i = rBraChars.length - 1; i >= 0; i--) {
-                    if (endPointer - i < 0 || chars[endPointer - i] != rBraChars[i]) {
-                        endsWithRBracket = false;
-                        break;
-                    }
-                }
-
                 // throw exception if not ends with right bracket
-                if (!endsWithRBracket) {
+                if (chars[endPointer] != RBRACKET) {
                     throw new InvalidSymbolException(String.format("Literal \"%s\"\'s bracket is not enclosed properly",
                             unprocessedStr));
                 }
 
-                startPointer += braChars.length;
-                endPointer -= rBraChars.length;
+                startPointer += 1;
+                endPointer -= 1;
                 continue;
 
             } // if (startsWithBracket)
@@ -136,7 +125,7 @@ public class Literal extends Symbol {
         } // while (startPointer < chars.length)
 
         // remove trailing space
-        while(endPointer > 0 && chars[endPointer] == ' ') endPointer--;
+        while (endPointer > 0 && chars[endPointer] == ' ') endPointer--;
 
         // check empty
         if (endPointer < startPointer) {
@@ -158,6 +147,10 @@ public class Literal extends Symbol {
         return new Literal(unprocessedStr, rawLiteral, isNegated);
     }
 
+    public static Literal factory(char c) {
+        return factory(Character.toString(c));
+    }
+
     @Contract("null -> false")
     private static boolean isAllLetters(String str) {
 
@@ -165,38 +158,7 @@ public class Literal extends Symbol {
             return false;
         }
 
-        for (char c : str.toCharArray()) {
-            if (!Character.isLetter(c)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    @Contract("null, _, _ -> fail; !null, null, _ -> fail")
-    private static boolean charArrayStartsWith(char[] chars, char[] prefix, int startIndex) {
-        if (chars == null || prefix == null) {
-            throw new InvalidSymbolException("Given char array is null");
-        }
-
-        if (startIndex < 0) {
-            throw new InvalidSymbolException(String.format("Given startIndex: \"%s\" is less than 0", startIndex));
-        }
-
-        if (chars.length - startIndex < prefix.length) {
-            return false;
-        }
-
-        for (int i = 0; i < prefix.length; i++) {
-            if (chars[startIndex + i] == ' ') {
-                continue;
-            }
-            if (chars[startIndex + i] != prefix[i]) {
-                return false;
-            }
-        }
-
-        return true;
+        return str.chars().allMatch(Character::isLetter);
     }
 
     public String getRaw() {
@@ -207,7 +169,7 @@ public class Literal extends Symbol {
         return this.fullLiteral;
     }
 
-    public String getUnprocessedLiteral() {
+    public String getUnprocessed() {
         return this.unprocessedLiteral;
     }
 
@@ -219,7 +181,7 @@ public class Literal extends Symbol {
                     "Assign value to " + (this.isTautology ? "tautology" : "contradiction") + " literal");
         }
 
-        this.truthValue = this.isNegated != value;
+        this.truthValue = this.isNegated != value;  // same as isNegated ? !value : value;
     }
 
     public boolean truthValue() {

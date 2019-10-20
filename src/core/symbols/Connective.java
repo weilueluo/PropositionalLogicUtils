@@ -24,7 +24,9 @@ public class Connective extends Symbol {
             throw new InvalidSymbolException("Connective can't be null");
         }
 
-        str = str.replaceAll("\\s", "");  // remove all whitespaces
+        // remove all whitespaces
+        str = str.chars().filter(c -> c != ' ').collect(StringBuilder::new, StringBuilder::appendCodePoint,
+                StringBuilder::append).toString();
 
         if (str.isEmpty()) {
             throw new InvalidSymbolException("Connective can't be empty");
@@ -45,7 +47,9 @@ public class Connective extends Symbol {
             throw new InvalidSymbolException("Connective can't be null");
         }
 
-        str = str.replaceAll("\\s", "");  // remove all whitespaces
+        // remove white spaces
+        str = str.chars().filter(c -> c != ' ').collect(StringBuilder::new, StringBuilder::appendCodePoint,
+                StringBuilder::append).toString();
 
         if (str.isEmpty()) {
             throw new InvalidSymbolException("Connective can't be empty");
@@ -59,6 +63,10 @@ public class Connective extends Symbol {
         throw new InvalidSymbolException(String.format("Connective \"%s\" is not recognised %n use %s | %s | %s | %s"
                 , str, OR, AND, IMPLIES, IFF));
 
+    }
+
+    public static Connective factory(char c) {
+        return factory(Character.toString(c));
     }
 
     @Override
