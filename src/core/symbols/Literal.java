@@ -34,13 +34,13 @@ public class Literal extends Symbol {
         this.isNegated = isNegated;
 
         if (rawLiteral.equals(TAUTOLOGY)) {
-            this.isTautology = true;
-            this.isContradiction = false;
+            this.isTautology = !isNegated;
+            this.isContradiction = isNegated;
             this.truthValue = !isNegated;
 
         } else if (rawLiteral.equals(CONTRADICTION)) {
-            this.isContradiction = true;
-            this.isTautology = false;
+            this.isContradiction = !isNegated;
+            this.isTautology = isNegated;
             this.truthValue = isNegated;
 
         } else {
