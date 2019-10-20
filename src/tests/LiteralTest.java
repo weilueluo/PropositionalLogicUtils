@@ -204,6 +204,11 @@ class LiteralTest {
         assertThrows(InvalidSymbolException.class, () -> Literal.factory("(((((())))))"));
         assertThrows(InvalidSymbolException.class, () -> Literal.factory("(~)"));
         assertThrows(InvalidSymbolException.class, () -> Literal.factory("~~()()~~"));
+        assertThrows(InvalidSymbolException.class, () -> Literal.factory("(a ))  ))"));
+        assertThrows(InvalidSymbolException.class, () -> Literal.factory("~~(s )~))   ~"));
+        assertThrows(InvalidSymbolException.class, () -> Literal.factory("( (~x   )) )"));
+        assertThrows(InvalidSymbolException.class, () -> Literal.factory("~~ x() ~~"));
+        assertThrows(InvalidSymbolException.class, () -> Literal.factory("~~( ) w~~"));
     }
 
     @Test
@@ -228,9 +233,41 @@ class LiteralTest {
 
     @Test
     void getFull() {
+        literal = Literal.factory("Wa");
+        assertEquals(literal.getFull(), "Wa");
+        literal = Literal.factory("~wa");
+        assertEquals(literal.getFull(), "~wa");
+        literal = Literal.factory("(((r)))");
+        assertEquals(literal.getFull(), "r");
+        literal = Literal.factory("~~~~~~a");
+        assertEquals(literal.getFull(), "a");
+        literal = Literal.factory("~~~~~(((a)))");
+        assertEquals(literal.getFull(), "~a");
+        literal = Literal.factory("(((~~~a)))");
+        assertEquals(literal.getFull(), "~a");
+        literal = Literal.factory("(~(~(~a)))");
+        assertEquals(literal.getFull(), "~a");
+        literal = Literal.factory("~(~~(~~(a)))");
+        assertEquals(literal.getFull(), "~a");
     }
 
     @Test
-    void getUnprocessedLiteral() {
+    void getUnprocessed() {
+        literal = Literal.factory("where");
+        assertEquals(literal.getUnprocessed(), "where");
+        literal = Literal.factory("~where");
+        assertEquals(literal.getUnprocessed(), "~where");
+        literal = Literal.factory("((((((where))))))");
+        assertEquals(literal.getUnprocessed(), "((((((where))))))");
+        literal = Literal.factory("~~~~~~((where))");
+        assertEquals(literal.getUnprocessed(), "~~~~~~((where))");
+        literal = Literal.factory("~(~(~~~(~(~(kind)))))");
+        assertEquals(literal.getUnprocessed(), "~(~(~~~(~(~(kind)))))");
+        literal = Literal.factory("(     (~~~~(~~~~Jokes))   )");
+        assertEquals(literal.getUnprocessed(), "(     (~~~~(~~~~Jokes))   )");
+        literal = Literal.factory("~~~~~~     ~united  ");
+        assertEquals(literal.getUnprocessed(), "~~~~~~     ~united  ");
+        literal = Literal.factory("~   ~~~(((~~~~a)))");
+        assertEquals(literal.getUnprocessed(), "~   ~~~(((~~~~a)))");
     }
 }
