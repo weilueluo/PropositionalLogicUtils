@@ -154,7 +154,7 @@ public class Literal extends Symbol {
 
         // check empty
         if (endPointer < startPointer) {
-            throw new InvalidSymbolException(String.format("Literal \"%s\"\'s raw is blank", unprocessedStr));
+            throw new InvalidSymbolException(String.format("Literal \"%s\"\'s raw form is blank", unprocessedStr));
         }
 
         /*
@@ -162,10 +162,6 @@ public class Literal extends Symbol {
          */
 
         String rawLiteral = String.valueOf(chars, startPointer, endPointer - startPointer + 1);
-
-        if (rawLiteral.isEmpty()) {
-            throw new InvalidSymbolException(String.format("Given literal \"%s\"\' raw form is empty", unprocessedStr));
-        }
 
         // check if contains invalid character in raw literal
         if (!isAllLetters(rawLiteral)) {
