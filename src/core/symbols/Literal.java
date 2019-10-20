@@ -6,37 +6,9 @@ import org.jetbrains.annotations.NotNull;
 
 public class Literal extends Symbol {
 
-    private final static Literal SINGLETON_TAUTOLOGY;
-    private final static Literal SINGLETON_NEGATED_TAUTOLOGY;
-    private final static Literal SINGLETON_CONTRADICTION;
-    private final static Literal SINGLETON_NEGATED_CONTRADICTION;
-
-    static {
-        // create singletons
-        SINGLETON_TAUTOLOGY = new Literal(TAUTOLOGY, TAUTOLOGY, false);
-        SINGLETON_NEGATED_TAUTOLOGY = new Literal(TAUTOLOGY, TAUTOLOGY, true);
-        SINGLETON_CONTRADICTION = new Literal(CONTRADICTION, CONTRADICTION, false);
-        SINGLETON_NEGATED_CONTRADICTION = new Literal(CONTRADICTION, CONTRADICTION, true);
-
-        // assign values
-        SINGLETON_TAUTOLOGY.assign(true);
-        SINGLETON_NEGATED_CONTRADICTION.assign(true);
-        SINGLETON_CONTRADICTION.assign(false);
-        SINGLETON_NEGATED_TAUTOLOGY.assign(false);
-
-        // assign metadata
-        SINGLETON_TAUTOLOGY.isTautology = SINGLETON_NEGATED_CONTRADICTION.isTautology = true;
-        SINGLETON_TAUTOLOGY.isContradiction = SINGLETON_NEGATED_CONTRADICTION.isContradiction = false;
-        SINGLETON_CONTRADICTION.isTautology = SINGLETON_NEGATED_TAUTOLOGY.isTautology = false;
-        SINGLETON_CONTRADICTION.isContradiction = SINGLETON_NEGATED_TAUTOLOGY.isContradiction = true;
-
-        // set isAssigned
-        SINGLETON_TAUTOLOGY.isAssigned = SINGLETON_CONTRADICTION.isAssigned =
-                SINGLETON_NEGATED_CONTRADICTION.isAssigned = SINGLETON_NEGATED_TAUTOLOGY.isAssigned = true;
-    }
-
     private String rawLiteral, fullLiteral, unprocessedLiteral;
-    private boolean isNegated, isAssigned, truthValue, isTautology, isContradiction;
+    private boolean isNegated, isTautology, isContradiction;
+    private Boolean truthValue;
 
     private Literal() {
     } // empty private constructor
@@ -60,7 +32,21 @@ public class Literal extends Symbol {
         }
 
         this.isNegated = isNegated;
-        this.isAssigned = this.isTautology = this.isContradiction = false;
+
+        if (rawLiteral.equals(TAUTOLOGY)) {
+            this.isTautology = true;
+            this.isContradiction = false;
+            this.truthValue = !isNegated;
+
+        } else if (rawLiteral.equals(CONTRADICTION)) {
+            this.isContradiction = true;
+            this.isTautology = false;
+            this.truthValue = isNegated;
+
+        } else {
+            this.isContradiction = this.isTautology = false;
+            this.truthValue = null;
+        }
     }
 
     /**
@@ -169,21 +155,6 @@ public class Literal extends Symbol {
                     "only, not \"%s\"", unprocessedStr, rawLiteral));
         }
 
-        // return singleton if tautology/contradiction
-        if (rawLiteral.equals(TAUTOLOGY)) {
-            if (isNegated) {
-                return SINGLETON_NEGATED_TAUTOLOGY;
-            } else {
-                return SINGLETON_TAUTOLOGY;
-            }
-        } else if (rawLiteral.equals(CONTRADICTION)) {
-            if (isNegated) {
-                return SINGLETON_NEGATED_CONTRADICTION;
-            } else {
-                return SINGLETON_CONTRADICTION;
-            }
-        }
-
         return new Literal(unprocessedStr, rawLiteral, isNegated);
     }
 
@@ -249,20 +220,18 @@ public class Literal extends Symbol {
         }
 
         this.truthValue = this.isNegated != value;
-        this.isAssigned = true;
     }
 
     public boolean truthValue() {
-        if (!this.isAssigned) {
+        if (this.truthValue == null) {
             throw new IllegalStateException(String.format("Access truth value before assignment for literal: \"%s\"",
-                    this.fullLiteral));
+                    this.unprocessedLiteral));
         }
         return this.truthValue;
     }
 
     private Boolean truthValueOrNull() {
-        if (!this.isAssigned) return null;
-        else return this.truthValue;
+        return this.truthValue;
     }
 
     public boolean isContradiction() {
@@ -281,6 +250,10 @@ public class Literal extends Symbol {
         return this.rawLiteral.equals(other.rawLiteral);
     }
 
+    public boolean fullEquals(Literal other) {
+        return this.fullLiteral.equals(other.fullLiteral);
+    }
+
     public boolean equals(Literal other) {
         return this.rawLiteral.equals(other.rawLiteral)
                 && this.isNegated == other.isNegated
@@ -291,7 +264,7 @@ public class Literal extends Symbol {
         return String.format("Unprocessed String: %s, full literal: %s, raw literal: %s, negated: %s, " +
                         "tautology: %s, contradiction: %s, assigned: %s",
                 this.unprocessedLiteral, this.fullLiteral, this.rawLiteral, this.isNegated, this.isTautology,
-                this.isContradiction, this.isAssigned ? this.truthValue : "null");
+                this.isContradiction, this.truthValue);
     }
 
 }
