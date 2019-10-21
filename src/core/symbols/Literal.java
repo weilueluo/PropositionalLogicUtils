@@ -182,7 +182,7 @@ public class Literal extends Symbol {
         this.truthValue = this.isNegated != value;  // same as isNegated ? !value : value;
     }
 
-    public boolean truthValue() {
+    public boolean getTruthValue() {
         if (this.truthValue == null) {
             throw new IllegalStateException(String.format("Access truth value before assignment for literal: \"%s\"",
                     this.unprocessedLiteral));
@@ -190,7 +190,7 @@ public class Literal extends Symbol {
         return this.truthValue;
     }
 
-    private Boolean truthValueOrNull() {
+    private Boolean getTruthValueOrNull() {
         return this.truthValue;
     }
 
@@ -198,23 +198,38 @@ public class Literal extends Symbol {
         return this.isNegated;
     }
 
+    public boolean isTautology() {
+        return this.isTautology;
+    }
+
+    public boolean isContradiction() {
+        return this.isContradiction;
+    }
+
+    public boolean isAssigned() {
+        return this.truthValue != null;
+    }
+
     public boolean rawEquals(Literal other) {
-        return this.rawLiteral.equals(other.rawLiteral);
+        if (other == null) throw new InvalidSymbolException("Given other literal for rawEquals is null");
+        else return this.rawLiteral.equals(other.rawLiteral);
     }
 
     public boolean fullEquals(Literal other) {
-        return this.fullLiteral.equals(other.fullLiteral);
+        if (other == null) throw new InvalidSymbolException("Given literal for rawEquals is null");
+        else return this.fullLiteral.equals(other.fullLiteral);
     }
 
     public boolean equals(Literal other) {
-        return this.rawLiteral.equals(other.rawLiteral)
+        if (other == null) throw new InvalidSymbolException("Given literal for equals is null");
+        else return this.rawLiteral.equals(other.rawLiteral)
                 && this.isNegated == other.isNegated
-                && this.truthValueOrNull() == other.truthValueOrNull();
+                && this.getTruthValueOrNull() == other.getTruthValueOrNull();
     }
 
     public String toString() {
-        return String.format("Unprocessed String: %s, full literal: %s, raw literal: %s, negated: %s, " +
-                        "tautology: %s, contradiction: %s, assigned: %s",
+        return String.format("Unprocessed String: %s,%n full literal: %s,%n raw literal: %s,%n negated: %s,%n " +
+                        "tautology: %s,%n contradiction: %s,%n assigned value: %s",
                 this.unprocessedLiteral, this.fullLiteral, this.rawLiteral, this.isNegated, this.isTautology,
                 this.isContradiction, this.truthValue);
     }

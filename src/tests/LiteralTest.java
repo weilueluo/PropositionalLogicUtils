@@ -17,36 +17,52 @@ class LiteralTest {
         // test not negated literal
         literal = Literal.factory("p");
         literal.assign(true);
-        assertTrue(literal.truthValue());
+        assertTrue(literal.getTruthValue());
         literal.assign(false);
-        assertFalse(literal.truthValue());
+        assertFalse(literal.getTruthValue());
 
         // test negated literal
         literal = Literal.factory("~p");
         literal.assign(true);
-        assertFalse(literal.truthValue());
+        assertFalse(literal.getTruthValue());
         literal.assign(false);
-        assertTrue(literal.truthValue());
+        assertTrue(literal.getTruthValue());
     }
 
     @Test
     void truthValue() {
         literal = Literal.factory("literal");
         literal.assign(true);
-        assertTrue(literal.truthValue());
+        assertTrue(literal.getTruthValue());
         literal.assign(false);
-        assertFalse(literal.truthValue());
+        assertFalse(literal.getTruthValue());
 
         literal = Literal.factory("~literal");
         literal.assign(true);
-        assertFalse(literal.truthValue());
+        assertFalse(literal.getTruthValue());
         literal.assign(false);
-        assertTrue(literal.truthValue());
+        assertTrue(literal.getTruthValue());
 
         literal = Literal.factory("T");
-        assertTrue(literal.truthValue());
+        assertTrue(literal.getTruthValue());
         literal = Literal.factory("F");
-        assertFalse(literal.truthValue());
+        assertFalse(literal.getTruthValue());
+    }
+
+    @Test
+    void isContradiction() {
+        literal = Literal.factory("F");
+        assertTrue(literal.isContradiction());
+        literal = Literal.factory("~F");
+        assertFalse(literal.isContradiction());
+    }
+
+    @Test
+    void isTautology() {
+        literal = Literal.factory("T");
+        assertTrue(literal.isTautology());
+        literal = Literal.factory("~T");
+        assertFalse(literal.isTautology());
     }
 
     @Test
