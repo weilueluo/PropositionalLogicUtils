@@ -3,12 +3,13 @@ package core.symbols;
 import core.exceptions.InvalidSymbolException;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class Literal extends Symbol {
 
     private String rawLiteral, fullLiteral, unprocessedLiteral;
-    private boolean isNegated, isTautology, isContradiction;
-    private Boolean truthValue;
+    private boolean isNegated;
+    private Boolean rawLiteralTruthValue, isRawTautology;
 
     private Literal() {
     } // empty private constructor
@@ -34,20 +35,20 @@ public class Literal extends Symbol {
         this.isNegated = isNegated;
 
         if (rawLiteral.equals(Character.toString(TAUTOLOGY))) {
-            this.isTautology = !isNegated;
-            this.isContradiction = isNegated;
-            this.truthValue = !isNegated;
+            this.isRawTautology = this.rawLiteralTruthValue = true;
 
         } else if (rawLiteral.equals(Character.toString(CONTRADICTION))) {
-            this.isContradiction = !isNegated;
-            this.isTautology = isNegated;
-            this.truthValue = isNegated;
+            this.isRawTautology = this.rawLiteralTruthValue = false;
 
         } else {
-            this.isContradiction = this.isTautology = false;
-            this.truthValue = null;
+            this.isRawTautology = this.rawLiteralTruthValue = null;
         }
     }
+
+    /*
+        FACTORY METHODS BELOW
+     */
+
 
     /**
      * This method return a Literal Object if given string is a valid representation of literal
@@ -65,9 +66,6 @@ public class Literal extends Symbol {
         if (str == null) {
             throw new InvalidSymbolException("Given Literal is null");
         }
-
-        String unprocessedStr = str;
-
 
         // parse negations and brackets
         boolean isNegated = false;
@@ -106,8 +104,8 @@ public class Literal extends Symbol {
 
                 // throw exception if not encountered right bracket
                 if (chars[endPointer] != RBRACKET) {
-                    throw new InvalidSymbolException(String.format("Literal \"%s\"\'s bracket is not enclosed properly",
-                            unprocessedStr));
+                    throw new InvalidSymbolException(String.format("Bracket is not enclosed properly for Literal " +
+                            "\"%s\"", str));
                 }
 
                 // remove brackets
@@ -126,7 +124,7 @@ public class Literal extends Symbol {
 
         // check empty
         if (endPointer < startPointer) {
-            throw new InvalidSymbolException(String.format("Literal \"%s\"\'s raw form is blank", unprocessedStr));
+            throw new InvalidSymbolException(String.format("Raw form is blank for literal \"%s\"", str));
         }
 
         /*
@@ -141,15 +139,17 @@ public class Literal extends Symbol {
         for (int i = startPointer; i <= endPointer; i++) {
             if (!Character.isLetter(chars[i])) {
                 // exception if not letter
-                throw new InvalidSymbolException(String.format("Given literal \"%s\"\'s raw form must contains " +
-                        "letters only, not \"%s\"", unprocessedStr, rawLiteral));
+                throw new InvalidSymbolException(String.format("Raw form of literal \"%s\" must contains letters " +
+                        "only, not \"%s\"", str, rawLiteral));
             }
         }
 
         // everything checked, return Literal instance
-        return new Literal(unprocessedStr, rawLiteral, isNegated);
+        return new Literal(str, rawLiteral, isNegated);
     }
 
+    @NotNull
+    @Contract("_ -> new")
     public static Literal factory(char c) {
         if (Character.isLetter(c)) {
             String s = Character.toString(c);
@@ -158,6 +158,10 @@ public class Literal extends Symbol {
             throw new InvalidSymbolException(String.format("Raw literal must be letters, not \"%s\"", c));
         }
     }
+
+    /*
+        GETTER METHODS BELOW
+     */
 
     public String getRaw() {
         return this.rawLiteral;
@@ -171,27 +175,23 @@ public class Literal extends Symbol {
         return this.unprocessedLiteral;
     }
 
-    // this will override previous value if it is not tautology or contradiction
-    public void assign(boolean value) {
-
-        if (this.isTautology || this.isContradiction) {
-            throw new IllegalStateException(
-                    "Assign value to " + (this.isTautology ? "tautology" : "contradiction") + " literal");
-        }
-
-        this.truthValue = this.isNegated != value;  // same as isNegated ? !value : value;
-    }
-
     public boolean getTruthValue() {
-        if (this.truthValue == null) {
+        if (this.rawLiteralTruthValue == null) {
             throw new IllegalStateException(String.format("Access truth value before assignment for literal: \"%s\"",
                     this.unprocessedLiteral));
         }
-        return this.truthValue;
+        return this.isNegated != this.rawLiteralTruthValue;  // same as isNegated ? !value : value;
     }
 
+    @Nullable
+    @Contract(pure = true)
     private Boolean getTruthValueOrNull() {
-        return this.truthValue;
+        if (this.rawLiteralTruthValue == null) return null;
+        else return this.isNegated != this.rawLiteralTruthValue;
+    }
+
+    public void invertNegation() {
+        this.isNegated = !this.isNegated;
     }
 
     public boolean isNegated() {
@@ -199,16 +199,54 @@ public class Literal extends Symbol {
     }
 
     public boolean isTautology() {
-        return this.isTautology;
+        if (this.isRawTautology == null) return false;
+        return this.isNegated ? !this.isRawTautology : this.isRawTautology;
     }
 
     public boolean isContradiction() {
-        return this.isContradiction;
+        if (this.isRawTautology == null) return false;
+        return this.isNegated ? this.isRawTautology : !this.isRawTautology;
     }
 
     public boolean isAssigned() {
-        return this.truthValue != null;
+        return this.rawLiteralTruthValue != null;
     }
+
+    public String toString() {
+        return String.format("Unprocessed String: %s,%nFull literal: %s,%nRaw literal: %s,%nNegated: %s,%n" +
+                        "Tautology: %s,%nContradiction: %s,%nAssigned raw value: %s,%nTruth value: %s",
+                this.unprocessedLiteral, this.fullLiteral, this.rawLiteral, this.isNegated(), this.isTautology(),
+                this.isContradiction(), this.rawLiteralTruthValue, this.getTruthValueOrNull());
+    }
+
+    /*
+        SETTER METHODS BELOW
+     */
+
+
+    // this will override previous value if it is not tautology or contradiction
+    // else fails
+    public void assign(boolean value) {
+        if (this.isTautology() || this.isContradiction()) {
+            throw new IllegalStateException(
+                    "Assign value to " + (this.isTautology() ? "tautology" : "contradiction") + " literal");
+        }
+        this.rawLiteralTruthValue = value;
+    }
+
+    // override previous raw literal value if it is not tautology/contradiction
+    // else stays the same
+    public void assignOrUnchanged(boolean value) {
+        if (!this.isTautology() && !this.isContradiction()) {
+            this.rawLiteralTruthValue = value;
+        }
+    }
+
+
+    /*
+        COMPARATOR METHODS BELLOW
+     */
+
 
     public boolean rawEquals(Literal other) {
         if (other == null) throw new InvalidSymbolException("Given other literal for rawEquals is null");
@@ -225,13 +263,6 @@ public class Literal extends Symbol {
         else return this.rawLiteral.equals(other.rawLiteral)
                 && this.isNegated == other.isNegated
                 && this.getTruthValueOrNull() == other.getTruthValueOrNull();
-    }
-
-    public String toString() {
-        return String.format("Unprocessed String: %s,%n full literal: %s,%n raw literal: %s,%n negated: %s,%n " +
-                        "tautology: %s,%n contradiction: %s,%n assigned value: %s",
-                this.unprocessedLiteral, this.fullLiteral, this.rawLiteral, this.isNegated, this.isTautology,
-                this.isContradiction, this.truthValue);
     }
 
 }

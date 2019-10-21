@@ -110,11 +110,11 @@ class LiteralTest {
 
     @Test
     void rawEquals() {
+        // test equals
         literal = Literal.factory("chicken");
         assertTrue(literal.rawEquals(Literal.factory("chicken")));
         literal = Literal.factory("~chicken");
         assertTrue(literal.rawEquals(Literal.factory("chicken")));
-
         literal = Literal.factory("(((((((chicken)))))))");
         assertTrue(literal.rawEquals(Literal.factory("chicken")));
         literal = Literal.factory("(~(chicken))");
@@ -125,10 +125,27 @@ class LiteralTest {
         assertTrue(literal.rawEquals(Literal.factory("chicken")));
         literal = Literal.factory("(~(~~~~((~~~magic))))");
         assertTrue(literal.rawEquals(Literal.factory("magic")));
+
+        // test not equals
+        literal = Literal.factory("chicken");
+        assertFalse(literal.rawEquals(Literal.factory("chickens")));
+        literal = Literal.factory("~chickenWings");
+        assertFalse(literal.rawEquals(Literal.factory("chicken")));
+        literal = Literal.factory("(((((((moon)))))))");
+        assertFalse(literal.rawEquals(Literal.factory("mom")));
+        literal = Literal.factory("(~(chickens))");
+        assertFalse(literal.rawEquals(Literal.factory("chicken")));
+        literal = Literal.factory("~~~(why)");
+        assertFalse(literal.rawEquals(Literal.factory("((((whyWhy))))")));
+        literal = Literal.factory("~~~~~~(~~~~(~~~(~~easy)))");
+        assertFalse(literal.rawEquals(Literal.factory("easily")));
+        literal = Literal.factory("(~(~~~~((~~~magic))))");
+        assertFalse(literal.rawEquals(Literal.factory("magical")));
     }
 
     @Test
     void testEquals() {
+        // test true
         literal = Literal.factory("chicken  ");
         assertTrue(literal.equals(Literal.factory("chicken")));
         literal = Literal.factory("~chicken");
@@ -147,10 +164,8 @@ class LiteralTest {
         assertTrue(literal.equals(Literal.factory("(~~~~EndOfLife)          ")));
         literal = Literal.factory("~(           ((~~~BorN)))");
         assertTrue(literal.equals(Literal.factory("BorN")));
-    }
 
-    @Test
-    void testFailEquals() {
+        // test false
         literal = Literal.factory("chicken");
         assertFalse(literal.equals(Literal.factory("~chicken")));
         literal = Literal.factory("~chicken");
@@ -172,9 +187,11 @@ class LiteralTest {
     }
 
     @Test
-    void testFactoryValidLiteral() {
+    void factory() {
+        // test success
         literal = Literal.factory("Water");
         literal = Literal.factory("~MAYDAY");
+        literal = Literal.factory("~~~((((awk))))");
         literal = Literal.factory("~~AppleOnTheGround");
         literal = Literal.factory("~~ ~~ ~~~~   MillionBananaKingdom");
         literal = Literal.factory("~             ~ CHOPSTICK                     ");
@@ -185,10 +202,8 @@ class LiteralTest {
         literal = Literal.factory("(NORM)");
         literal = Literal.factory("(~TENSE)");
         literal = Literal.factory("~~~~~~((SPACe))");
-    }
 
-    @Test
-    void testFactoryInvalidLiteral() {
+        // test fails
         assertThrows(InvalidSymbolException.class, () -> Literal.factory("be ar"));
         assertThrows(InvalidSymbolException.class, () -> Literal.factory("water#r"));
         assertThrows(InvalidSymbolException.class, () -> Literal.factory("~3MAYDAY"));
@@ -213,6 +228,7 @@ class LiteralTest {
 
     @Test
     void getRaw() {
+        // equals test
         literal = Literal.factory("hey");
         assertEquals(literal.getRaw(), "hey");
         literal = Literal.factory("~hey");
@@ -229,30 +245,68 @@ class LiteralTest {
         assertEquals(literal.getRaw(), "longStuff");
         literal = Literal.factory("~((~~~~(~(~~complex))))");
         assertEquals(literal.getRaw(), "complex");
+
+        // not equals test
+        literal = Literal.factory("a");
+        assertNotEquals(literal.getRaw(), "ab");
+        literal = Literal.factory("~as");
+        assertNotEquals(literal.getRaw(), "ass");
+        literal = Literal.factory("~~~q");
+        assertNotEquals(literal.getRaw(), "w");
+        literal = Literal.factory("(((ops)))");
+        assertNotEquals(literal.getRaw(), "os");
+        literal = Literal.factory("(little)");
+        assertNotEquals(literal.getRaw(), "lit");
+        literal = Literal.factory("((((justInTime))))");
+        assertNotEquals(literal.getRaw(), "justInTimes");
+        literal = Literal.factory("~~~~~~longStuff");
+        assertNotEquals(literal.getRaw(), "shortStuff");
+        literal = Literal.factory("~((~~~~(~(~~complex))))");
+        assertNotEquals(literal.getRaw(), "simple");
     }
 
     @Test
     void getFull() {
+        // test equals
         literal = Literal.factory("Wa");
         assertEquals(literal.getFull(), "Wa");
         literal = Literal.factory("~wa");
         assertEquals(literal.getFull(), "~wa");
-        literal = Literal.factory("(((r)))");
+        literal = Literal.factory("(((r))  )   ");
         assertEquals(literal.getFull(), "r");
         literal = Literal.factory("~~~~~~a");
         assertEquals(literal.getFull(), "a");
-        literal = Literal.factory("~~~~~(((a)))");
+        literal = Literal.factory("~~~~~(((a  )))");
         assertEquals(literal.getFull(), "~a");
-        literal = Literal.factory("(((~~~a)))");
+        literal = Literal.factory("(((~~ ~a)))");
         assertEquals(literal.getFull(), "~a");
         literal = Literal.factory("(~(~(~a)))");
         assertEquals(literal.getFull(), "~a");
-        literal = Literal.factory("~(~~(~~(a)))");
+        literal = Literal.factory("~(~~(~~(a))  )");
         assertEquals(literal.getFull(), "~a");
+
+        // test not equals
+        literal = Literal.factory("wind");
+        assertNotEquals(literal.getFull(), "~wind");
+        literal = Literal.factory("~space");
+        assertNotEquals(literal.getFull(), "space");
+        literal = Literal.factory("(((regex))  )   ");
+        assertNotEquals(literal.getFull(), "re");
+        literal = Literal.factory("~~~~~~x");
+        assertNotEquals(literal.getFull(), "v");
+        literal = Literal.factory("~~~~~(((him  )))");
+        assertNotEquals(literal.getFull(), "her");
+        literal = Literal.factory("(((~~ ~a)))");
+        assertNotEquals(literal.getFull(), "a");
+        literal = Literal.factory("(~(~(~white)))");
+        assertNotEquals(literal.getFull(), "~black");
+        literal = Literal.factory("~(~~(~~(went))  )");
+        assertNotEquals(literal.getFull(), "~go");
     }
 
     @Test
     void getUnprocessed() {
+        // test true
         literal = Literal.factory("where");
         assertEquals(literal.getUnprocessed(), "where");
         literal = Literal.factory("~where");
@@ -269,5 +323,123 @@ class LiteralTest {
         assertEquals(literal.getUnprocessed(), "~~~~~~     ~united  ");
         literal = Literal.factory("~   ~~~(((~~~~a)))");
         assertEquals(literal.getUnprocessed(), "~   ~~~(((~~~~a)))");
+
+        // test false
+        literal = Literal.factory("~where");
+        assertNotEquals(literal.getUnprocessed(), "~~where");
+        literal = Literal.factory("which");
+        assertNotEquals(literal.getUnprocessed(), "~~which");
+        literal = Literal.factory("(((there)))");
+        assertNotEquals(literal.getUnprocessed(), "((there))");
+        literal = Literal.factory("~~~~~~((shut))");
+        assertNotEquals(literal.getUnprocessed(), "~~~~~~(((shut)))");
+        literal = Literal.factory("~(~(~~~(~(~(way)))))");
+        assertNotEquals(literal.getUnprocessed(), "~(~(~~~(~(~way))))");
+        literal = Literal.factory("(     (~~~~(~~~~jokes))   )");
+        assertNotEquals(literal.getUnprocessed(), "(     (~~~~(~~~~Jokes))   )");
+        literal = Literal.factory("~~~~~~     ~united  ");
+        assertNotEquals(literal.getUnprocessed(), "~~~~~~     ~unite  ");
+        literal = Literal.factory("~  ~~ ~~~(((~~~~a)))");
+        assertNotEquals(literal.getUnprocessed(), "~ ~~  ~~~(((~~~~a)))");
+    }
+
+    @Test
+    void getTruthValue() {
+        literal = Literal.factory("banana");
+        literal.assign(true);
+        assertTrue(literal.getTruthValue());
+
+        literal = Literal.factory("~banana");
+        literal.assign(true);
+        assertFalse(literal.getTruthValue());
+
+        literal = Literal.factory("banana");
+        literal.assign(false);
+        assertFalse(literal.getTruthValue());
+
+        literal = Literal.factory("~banana");
+        literal.assign(false);
+        assertTrue(literal.getTruthValue());
+    }
+
+    @Test
+    void isAssigned() {
+        // test assigned
+        literal = Literal.factory("fish");
+        literal.assign(true);
+        assertTrue(literal.isAssigned());
+
+        literal = Literal.factory("~fish");
+        literal.assign(true);
+        assertTrue(literal.isAssigned());
+
+        literal = Literal.factory("fish");
+        literal.assign(false);
+        assertTrue(literal.isAssigned());
+
+        literal = Literal.factory("~fish");
+        literal.assign(false);
+        assertTrue(literal.isAssigned());
+
+        // test not assigned
+        literal = Literal.factory("sand");
+        assertFalse(literal.isAssigned());
+
+        literal = Literal.factory("~sand");
+        assertFalse(literal.isAssigned());
+    }
+
+    @Test
+    void fullEquals() {
+        // test equals
+        literal = Literal.factory("cv");
+        assertTrue(literal.fullEquals(Literal.factory("cv")));
+        literal = Literal.factory("~cv");
+        assertTrue(literal.fullEquals(Literal.factory("~cv")));
+        literal = Literal.factory("(((((((test)))))))");
+        assertTrue(literal.fullEquals(Literal.factory("test")));
+        literal = Literal.factory("(~(test))");
+        assertTrue(literal.fullEquals(Literal.factory("~test")));
+        literal = Literal.factory("~~~(what)");
+        assertTrue(literal.fullEquals(Literal.factory("((((~what))))")));
+        literal = Literal.factory("~~~~~~(~~~~(~~~(~~chicken)))");
+        assertTrue(literal.fullEquals(Literal.factory("~chicken")));
+        literal = Literal.factory("(~(~~~~((~~~magic))))");
+        assertTrue(literal.fullEquals(Literal.factory("magic")));
+
+        // test not equals
+        literal = Literal.factory("chicken");
+        assertFalse(literal.fullEquals(Literal.factory("~chickens")));
+        literal = Literal.factory("~chickenWings");
+        assertFalse(literal.fullEquals(Literal.factory("chicken")));
+        literal = Literal.factory("(((((((moon)))))))");
+        assertFalse(literal.fullEquals(Literal.factory("mom")));
+        literal = Literal.factory("(~(chickens))");
+        assertFalse(literal.fullEquals(Literal.factory("~chicken")));
+        literal = Literal.factory("~~~(why)");
+        assertFalse(literal.fullEquals(Literal.factory("((((whyWhy))))")));
+        literal = Literal.factory("~~~~~~(~~~~(~~~(~~easy)))");
+        assertFalse(literal.fullEquals(Literal.factory("easily")));
+        literal = Literal.factory("(~(~~~~((~~~magic))))");
+        assertFalse(literal.fullEquals(Literal.factory("magical")));
+    }
+
+    @Test
+    void testToString() {
+        literal = Literal.factory("(~test)");
+        assertEquals(literal.toString(), String.format("Unprocessed String: (~test),%nFull literal: ~test,%nRaw literal: test,%nNegated: true,%n" +
+                "Tautology: false,%nContradiction: false,%nAssigned raw value: null,%nTruth value: null"));
+
+        literal = Literal.factory("(test)");
+        assertEquals(literal.toString(), String.format("Unprocessed String: (test),%nFull literal: test,%nRaw literal: test,%nNegated: false,%n" +
+                "Tautology: false,%nContradiction: false,%nAssigned raw value: null,%nTruth value: null"));
+
+        literal = Literal.factory("(T)");
+        assertEquals(literal.toString(), String.format("Unprocessed String: (T),%nFull literal: T,%nRaw literal: T,%nNegated: false,%n" +
+                "Tautology: true,%nContradiction: false,%nAssigned raw value: true,%nTruth value: true"));
+
+        literal = Literal.factory("(~T)");
+        assertEquals(literal.toString(), String.format("Unprocessed String: (~T),%nFull literal: ~T,%nRaw literal: T,%nNegated: true,%n" +
+                "Tautology: false,%nContradiction: true,%nAssigned raw value: true,%nTruth value: false"));
     }
 }
