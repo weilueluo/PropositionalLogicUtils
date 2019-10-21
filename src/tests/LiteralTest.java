@@ -50,22 +50,6 @@ class LiteralTest {
     }
 
     @Test
-    void isContradiction() {
-        literal = Literal.factory("F");
-        assertTrue(literal.isContradiction());
-        literal = Literal.factory("~F");
-        assertFalse(literal.isContradiction());
-    }
-
-    @Test
-    void isTautology() {
-        literal = Literal.factory("T");
-        assertTrue(literal.isTautology());
-        literal = Literal.factory("~T");
-        assertFalse(literal.isTautology());
-    }
-
-    @Test
     void isNegated() {
         // test contradiction
         literal = Literal.factory("F");

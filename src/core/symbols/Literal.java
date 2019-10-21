@@ -50,8 +50,9 @@ public class Literal extends Symbol {
     }
 
     /**
-     * This method return a Literal Object if parsing passed
+     * This method return a Literal Object if given string is a valid representation of literal
      * This method sanitize input string before passing to actually constructor
+     * Complexity is O(n)
      *
      * @param str the input literal string
      * @return Literal Object
@@ -62,21 +63,17 @@ public class Literal extends Symbol {
     public static Literal factory(String str) throws InvalidSymbolException {
         // check null
         if (str == null) {
-            throw new InvalidSymbolException("Null is not a valid literal");
+            throw new InvalidSymbolException("Given Literal is null");
         }
 
         String unprocessedStr = str;
 
-        // remove space
-        str = str.strip();
 
-        // check empty
-        if (str.isEmpty()) {
-            throw new InvalidSymbolException("Given literal is blank");
-        }
-
-        // now parse negations and brackets
+        // parse negations and brackets
         boolean isNegated = false;
+
+        // convert to array first instead of charAt due to extra index check in charAt, small string toCharArray
+        // should be faster
         char[] chars = str.toCharArray();
 
         // for looping, this should later point to start of raw literal
@@ -89,39 +86,39 @@ public class Literal extends Symbol {
         while (startPointer < chars.length) {
             if (chars[startPointer] == ' ') {  // ignore space
                 startPointer++;
-                continue;
             }
 
             // if starts with negation then negate the negation sign and increase start pointer
-            if (chars[startPointer] == NEG) {
+            else if (chars[startPointer] == NEG) {
                 isNegated = !isNegated;
                 startPointer += 1;
-                continue;
             }
 
             // then we check if starts with left bracket
 
             // if starts with left bracket, we check if ends with right bracket and increase pointer
-            if (chars[startPointer] == LBRACKET) {
+            else if (chars[startPointer] == LBRACKET) {
 
                 // then we check if ends with right bracket
-                while (endPointer > startPointer && chars[endPointer] == ' ') endPointer--; // skip spaces
 
-                // throw exception if not ends with right bracket
+                // skip spaces first
+                while (endPointer > startPointer && chars[endPointer] == ' ') endPointer--;
+
+                // throw exception if not encountered right bracket
                 if (chars[endPointer] != RBRACKET) {
                     throw new InvalidSymbolException(String.format("Literal \"%s\"\'s bracket is not enclosed properly",
                             unprocessedStr));
                 }
 
+                // remove brackets
                 startPointer += 1;
                 endPointer -= 1;
-                continue;
 
             } // if (startsWithBracket)
 
             // if we reach here that means starts neither with negation nor right bracket
             // so we can terminate the loop
-            break;
+            else break;
         } // while (startPointer < chars.length)
 
         // remove trailing space
@@ -136,29 +133,30 @@ public class Literal extends Symbol {
          * raw literal will be between pointers here
          */
 
+        // get the raw literal, before checks if it is valid
+        // so that we can easily print it if not valid
         String rawLiteral = String.valueOf(chars, startPointer, endPointer - startPointer + 1);
 
-        // check if contains invalid character in raw literal
-        if (!isAllLetters(rawLiteral)) {
-            throw new InvalidSymbolException(String.format("Given literal \"%s\"\'s raw form must contains letters " +
-                    "only, not \"%s\"", unprocessedStr, rawLiteral));
+        // now we check if the raw string characters are letters
+        for (int i = startPointer; i <= endPointer; i++) {
+            if (!Character.isLetter(chars[i])) {
+                // exception if not letter
+                throw new InvalidSymbolException(String.format("Given literal \"%s\"\'s raw form must contains " +
+                        "letters only, not \"%s\"", unprocessedStr, rawLiteral));
+            }
         }
 
+        // everything checked, return Literal instance
         return new Literal(unprocessedStr, rawLiteral, isNegated);
     }
 
     public static Literal factory(char c) {
-        return factory(Character.toString(c));
-    }
-
-    @Contract("null -> false")
-    private static boolean isAllLetters(String str) {
-
-        if (str == null) {
-            return false;
+        if (Character.isLetter(c)) {
+            String s = Character.toString(c);
+            return new Literal(s, s, false);
+        } else {
+            throw new InvalidSymbolException(String.format("Raw literal must be letters, not \"%s\"", c));
         }
-
-        return str.chars().allMatch(Character::isLetter);
     }
 
     public String getRaw() {
@@ -194,14 +192,6 @@ public class Literal extends Symbol {
 
     private Boolean truthValueOrNull() {
         return this.truthValue;
-    }
-
-    public boolean isContradiction() {
-        return this.isContradiction;
-    }
-
-    public boolean isTautology() {
-        return this.isTautology;
     }
 
     public boolean isNegated() {
