@@ -1,6 +1,6 @@
 package core.exceptions;
 
-public class InvalidFormulaException extends Exception {
+public class InvalidFormulaException extends RuntimeException {
     public InvalidFormulaException() {
         super();
     }
