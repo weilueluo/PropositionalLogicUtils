@@ -43,6 +43,7 @@ public class Parser {
     private char[] chars;  // char array form of current input string
     private Stack<Character> brackets_stack;
     private Symbol prev_char;
+    private boolean incomplete_clause;
 
     public Parser() {
         reset(null);
@@ -50,6 +51,7 @@ public class Parser {
 
     private void reset(String newStr) {
         i = 0;
+        incomplete_clause = true;
         parsed_tokens = new ArrayList<>();
         curr_token_builder = new StringBuilder();
         curr_input_str = newStr;
@@ -90,7 +92,7 @@ public class Parser {
         if (prev_char == Symbol.START) {
             handle_error("Propositional logic formula can't be empty");
         }
-        if (curr_token_builder.length() != 0) {
+        if (incomplete_clause) {
             handle_error("Incomplete clause");
         }
         if (!brackets_stack.empty()) {
@@ -137,6 +139,7 @@ public class Parser {
         }
         curr_token_builder.append(NEG);
         prev_char = Symbol.NEG;
+        incomplete_clause = true;
         i++;
     }
 
@@ -147,6 +150,7 @@ public class Parser {
         curr_token_builder.append(LEFT_BRACKET);
         prev_char = Symbol.LBRACKET;
         brackets_stack.push(LEFT_BRACKET);
+        incomplete_clause = true;
         endToken();
         i++;
     }
@@ -159,8 +163,9 @@ public class Parser {
             handle_error("Unopened closing bracket");
         }
         curr_token_builder.append(RIGHT_BRACKET);
-        endToken();
         prev_char = Symbol.RBRACKET;
+        incomplete_clause = false;
+        endToken();
         i++;
     }
 
@@ -170,8 +175,9 @@ public class Parser {
             handle_error(String.format("Invalid character: \"%s\", do you mean %s?", FORWARD_SLASH, AND));
         } else {
             curr_token_builder.append(AND);
-            endToken();
             prev_char = Symbol.CONNECTIVE;
+            incomplete_clause = true;
+            endToken();
             i += 2;
         }
     }
@@ -182,8 +188,9 @@ public class Parser {
             handle_error(String.format("Invalid character: \"%s\", do you mean %s?", BACKWARD_SLASH, OR));
         } else {
             curr_token_builder.append(OR);
-            endToken();
             prev_char = Symbol.CONNECTIVE;
+            incomplete_clause = true;
+            endToken();
             i += 2;
         }
     }
@@ -197,8 +204,9 @@ public class Parser {
             handle_error(String.format("Invalid character: \"%s\", do you mean %s?", DASH, IMPLIES));
         }
         curr_token_builder.append(IMPLIES);
-        endToken();
         prev_char = Symbol.CONNECTIVE;
+        incomplete_clause = true;
+        endToken();
         i += 2;
     }
 
@@ -209,6 +217,7 @@ public class Parser {
         } else {
             curr_token_builder.append(LESS_THAN);  // will append -> in the next loop
             prev_char = Symbol.NULL;
+            incomplete_clause = true;
             endToken();
             i++;
         }
@@ -221,6 +230,7 @@ public class Parser {
         while (i < chars.length && Character.isLetter(chars[i])) {
             curr_token_builder.append(chars[i++]);
         }
+        incomplete_clause = false;
         endToken();
         prev_char = Symbol.LITERAL;
     }
