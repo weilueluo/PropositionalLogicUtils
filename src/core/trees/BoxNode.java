@@ -65,16 +65,12 @@ public class BoxNode extends BinaryNode {
         else closed = true;
     }
 
-    public boolean isClosed() {
-        return closed;
-    }
-
     @Override
     public String toString(int depth) {
         String spaces = getSpaces(depth);
-        return String.format(spaces + "</>%n"
-                            + head.toString(depth)
-                            + spaces + "</>%n");
+        return String.format(spaces + "|-(%n"
+                            + head.toString(depth + 1)
+                            + spaces + "|-)%n");
     }
 
 }

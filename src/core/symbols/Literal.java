@@ -7,11 +7,14 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
+
 public class Literal extends Symbol {
 
     private String rawLiteral, fullLiteral, unprocessedLiteral;
     private boolean isNegated;
     private Boolean rawLiteralTruthValue, isRawTautology;
+    private int hashcode;
 
     private Literal() {
     } // empty private constructor
@@ -50,6 +53,8 @@ public class Literal extends Symbol {
         } else {
             this.isRawTautology = this.rawLiteralTruthValue = null;
         }
+
+        hashcode = Objects.hashCode(getFull());
     }
 
     /*
@@ -183,6 +188,16 @@ public class Literal extends Symbol {
     @Override
     public String getUnprocessed() {
         return this.unprocessedLiteral;
+    }
+
+    @Override
+    public int hashCode() {
+        return hashcode;
+    }
+
+    @Override
+    public boolean equals(Symbol other) {
+        return hashcode == other.hashCode();
     }
 
     public boolean getTruthValue() {

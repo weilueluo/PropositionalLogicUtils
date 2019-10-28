@@ -27,23 +27,23 @@ import static core.symbols.Symbol.*;
  *
  * Time Complexity
  * The checking algorithm runs in one pass O(n)
- * The insertion algorithm runs in O(log n)
- * Overall this runs in O(n + log n) = O(n)
+ * The insertion algorithm runs in O(n log n)
+ * Overall this runs in O(n + n log n) = O(n)
  *
  * It parse by determining whether previous token can be follow by current token
  *
- * // TODO add checks to insertion?
+ *
  */
 public class Parser {
 
     private int index;  // current index
-    private Stack<BoxNode> box_nodes_stack;  // for checking valid brackets
-    private BoxNode curr_node;
+    private Stack<BoxNode> box_nodes_stack;  // for saving previous context when creating new context for each bracket
+    private BoxNode curr_node;  // the current insertion context
     private boolean incomplete_clause;  // a flag to check if parsing stopped half way of a complete clause
     private String unprocessed_str;  // user input string
     private Token prev_token;  // for checking if previous token followed by current token
     private char[] chars;  // char array form of current input string
-    private Stack<Character> brackets_stack;
+    private Stack<Character> brackets_stack;  // for checking valid bracket
 
 
     public Parser() {
@@ -53,11 +53,11 @@ public class Parser {
     public static void main(String[] args) {
         Parser p = new Parser();
         Instant start = Instant.now();
-        p.evaluate("(Chicken /\\ (~Tiger -> cat) <-> Snake \\/ Dog -> ~Cat /\\ (Snake <-> Duck)) \\/ ~Monkey");
+        p.evaluate("((k\\/a)/\\(b\\/c<->d)->e)");
         Instant end = Instant.now();
         System.out.println((String.format("Runtime: %sms", Duration.between(start, end).toMillis())));
         System.out.println(p);
-//        System.out.println(p.getTree().toString(1));
+        System.out.println(p.getTree().toString(0));
     }
 
     private void reset(String newStr) {

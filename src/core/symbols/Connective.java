@@ -5,6 +5,8 @@ import core.trees.ConnNode;
 import core.trees.Node;
 import org.jetbrains.annotations.Contract;
 
+import java.util.Objects;
+
 import static core.common.Utilities.stripAllSpaces;
 
 public class Connective extends Symbol {
@@ -15,6 +17,7 @@ public class Connective extends Symbol {
     private final static Connective SINGLETON_OR;
     private final String unprocessed_str;
     private final int precedence;
+    private int hashcode;
 
     static {
         SINGLETON_IFF = new Connective(IFF);
@@ -64,6 +67,7 @@ public class Connective extends Symbol {
                         " | %s instead", str, OR, AND, IMPLIES, IFF));
         }
 
+        hashcode = Objects.hashCode(getFull());
     }
 
     @Contract("null -> fail")
@@ -120,5 +124,15 @@ public class Connective extends Symbol {
     @Override
     public String getUnprocessed() {
         return this.unprocessed_str;
+    }
+
+    @Override
+    public int hashCode() {
+        return hashcode;
+    }
+
+    @Override
+    public boolean equals(Symbol other) {
+        return hashcode == other.hashCode();
     }
 }

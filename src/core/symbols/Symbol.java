@@ -30,4 +30,8 @@ public abstract class Symbol {
     public abstract String getFull();
 
     public abstract String getUnprocessed();
+
+    public abstract int hashCode();
+
+    public abstract boolean equals(Symbol other);
 }

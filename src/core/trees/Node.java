@@ -17,7 +17,7 @@ public abstract class Node implements NodeInsertion {
     }
 
     protected String getSpaces(int depth) {
-        return "-".repeat(depth * 3);
+        return " ".repeat(depth * 3);
     }
 
     public abstract String toString(int depth);
