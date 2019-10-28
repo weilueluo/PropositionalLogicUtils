@@ -3,7 +3,6 @@ package core.symbols;
 import core.exceptions.InvalidNodeException;
 import core.exceptions.InvalidSymbolException;
 import core.trees.Node;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
@@ -12,8 +11,8 @@ import static core.common.Utilities.stripAllSpaces;
 
 public class Bracket extends Symbol {
 
-    public static Bracket LEFT_BRACKET;
-    public static Bracket RIGHT_BRACKET;
+    private static Bracket LEFT_BRACKET;
+    private static Bracket RIGHT_BRACKET;
 
     static {
         LEFT_BRACKET = new Bracket(LBRACKET);
@@ -90,8 +89,10 @@ public class Bracket extends Symbol {
     }
 
     @Override
-    public boolean equals(@NotNull Symbol other) {
-        return hashcode == other.hashCode();
+    public boolean equals(Object other) {
+        if (other instanceof Bracket) {
+            return hashcode == other.hashCode();
+        } else return false;
     }
 
 }

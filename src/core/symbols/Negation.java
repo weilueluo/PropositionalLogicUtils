@@ -3,8 +3,6 @@ package core.symbols;
 import core.exceptions.InvalidSymbolException;
 import core.trees.Node;
 import core.trees.NegNode;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
@@ -22,7 +20,6 @@ public class Negation extends Symbol {
     private String unprocessed_str;
     private int hashcode;
 
-    @Contract("null -> fail")
     private Negation(String s) {
         if (s == null) throw new InvalidSymbolException("Null is not negation");
         unprocessed_str = s;
@@ -43,7 +40,7 @@ public class Negation extends Symbol {
         hashcode = Objects.hashCode(getFull());
     }
 
-    public static Negation newInstance(@NotNull String s) {
+    public static Negation newInstance(String s) {
         if (s.equals(String.valueOf(NEG))) {
             return NEGATION;
         } else {
@@ -85,7 +82,9 @@ public class Negation extends Symbol {
     }
 
     @Override
-    public boolean equals(Symbol other) {
-        return hashcode == other.hashCode();
+    public boolean equals(Object other) {
+        if (other instanceof Negation) {
+            return hashcode == other.hashCode();
+        } else return false;
     }
 }

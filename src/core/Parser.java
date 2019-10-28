@@ -8,10 +8,11 @@ import core.trees.BoxNode;
 import core.trees.ConnNode;
 import core.trees.LitNode;
 import core.trees.NegNode;
-import org.jetbrains.annotations.Contract;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Stack;
 
 import static core.symbols.Symbol.*;
@@ -58,6 +59,11 @@ public class Parser {
         System.out.println((String.format("Runtime: %sms", Duration.between(start, end).toMillis())));
         System.out.println(p);
         System.out.println(p.getTree().toString(0));
+        Map<Literal, Boolean> interpretation = new HashMap<Literal, Boolean>();
+        System.out.println(p.getTree().isSatisfiable(interpretation, true));
+        for (Map.Entry e : interpretation.entrySet()) {
+            System.out.println(((Literal) e.getKey()).getRaw() + ": " + e.getValue());
+        }
     }
 
     private void reset(String newStr) {
@@ -75,7 +81,7 @@ public class Parser {
         return curr_node;
     }
 
-    public void evaluate(String s) throws InvalidFormulaException {
+    public Parser evaluate(String s) throws InvalidFormulaException {
         if (s == null) {
             throw new InvalidFormulaException("Propositional Logic formula can't be null");
         }
@@ -128,13 +134,13 @@ public class Parser {
             handle_error("Unclosed opening bracket");
         }
 
+        return this;
     }
 
     public String toString() {
         return unprocessed_str;
     }
 
-    @Contract(" _ -> fail")
     private void handle_error(String msg) {
         StringBuilder sb = new StringBuilder();
         sb.append(msg).append(System.lineSeparator()).append(unprocessed_str).append(System.lineSeparator());

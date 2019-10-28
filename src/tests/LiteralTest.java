@@ -13,43 +13,6 @@ class LiteralTest {
     private Literal literal;
 
     @Test
-    void assign() {
-        // test not negated literal
-        literal = Literal.newInstance("p");
-        literal.assign(true);
-        assertTrue(literal.getTruthValue());
-        literal.assign(false);
-        assertFalse(literal.getTruthValue());
-
-        // test negated literal
-        literal = Literal.newInstance("~p");
-        literal.assign(true);
-        assertFalse(literal.getTruthValue());
-        literal.assign(false);
-        assertTrue(literal.getTruthValue());
-    }
-
-    @Test
-    void truthValue() {
-        literal = Literal.newInstance("literal");
-        literal.assign(true);
-        assertTrue(literal.getTruthValue());
-        literal.assign(false);
-        assertFalse(literal.getTruthValue());
-
-        literal = Literal.newInstance("~literal");
-        literal.assign(true);
-        assertFalse(literal.getTruthValue());
-        literal.assign(false);
-        assertTrue(literal.getTruthValue());
-
-        literal = Literal.newInstance("T");
-        assertTrue(literal.getTruthValue());
-        literal = Literal.newInstance("F");
-        assertFalse(literal.getTruthValue());
-    }
-
-    @Test
     void isContradiction() {
         literal = Literal.newInstance("F");
         assertTrue(literal.isContradiction());
@@ -94,54 +57,16 @@ class LiteralTest {
         // test more negation
         literal = Literal.newInstance("~~banana");
         assertFalse(literal.isNegated());
-        assertTrue(literal.rawEquals(Literal.newInstance("banana"))); // check if negation is checked
         literal = Literal.newInstance("~~~banana");
-        assertTrue(literal.rawEquals(Literal.newInstance("banana"))); // check if negation is checked
         assertTrue(literal.isNegated());
 
         // test negation with bracket
         literal = Literal.newInstance("~(~banana)");
         assertFalse(literal.isNegated());
-        assertTrue(literal.rawEquals(Literal.newInstance("banana"))); // check if negation is checked
         literal = Literal.newInstance("(~~(~banana))");
-        assertTrue(literal.rawEquals(Literal.newInstance("(banana)"))); // check if negation is checked
         assertTrue(literal.isNegated());
     }
 
-    @Test
-    void rawEquals() {
-        // test equals
-        literal = Literal.newInstance("chicken");
-        assertTrue(literal.rawEquals(Literal.newInstance("chicken")));
-        literal = Literal.newInstance("~chicken");
-        assertTrue(literal.rawEquals(Literal.newInstance("chicken")));
-        literal = Literal.newInstance("(((((((chicken)))))))");
-        assertTrue(literal.rawEquals(Literal.newInstance("chicken")));
-        literal = Literal.newInstance("(~(chicken))");
-        assertTrue(literal.rawEquals(Literal.newInstance("chicken")));
-        literal = Literal.newInstance("~~~(what)");
-        assertTrue(literal.rawEquals(Literal.newInstance("((((what))))")));
-        literal = Literal.newInstance("~~~~~~(~~~~(~~~(~~chicken)))");
-        assertTrue(literal.rawEquals(Literal.newInstance("chicken")));
-        literal = Literal.newInstance("(~(~~~~((~~~magic))))");
-        assertTrue(literal.rawEquals(Literal.newInstance("magic")));
-
-        // test not equals
-        literal = Literal.newInstance("chicken");
-        assertFalse(literal.rawEquals(Literal.newInstance("chickens")));
-        literal = Literal.newInstance("~chickenWings");
-        assertFalse(literal.rawEquals(Literal.newInstance("chicken")));
-        literal = Literal.newInstance("(((((((moon)))))))");
-        assertFalse(literal.rawEquals(Literal.newInstance("mom")));
-        literal = Literal.newInstance("(~(chickens))");
-        assertFalse(literal.rawEquals(Literal.newInstance("chicken")));
-        literal = Literal.newInstance("~~~(why)");
-        assertFalse(literal.rawEquals(Literal.newInstance("((((whyWhy))))")));
-        literal = Literal.newInstance("~~~~~~(~~~~(~~~(~~easy)))");
-        assertFalse(literal.rawEquals(Literal.newInstance("easily")));
-        literal = Literal.newInstance("(~(~~~~((~~~magic))))");
-        assertFalse(literal.rawEquals(Literal.newInstance("magical")));
-    }
 
     @Test
     void testEquals() {
@@ -341,87 +266,6 @@ class LiteralTest {
         assertNotEquals(literal.getUnprocessed(), "~~~~~~     ~unite  ");
         literal = Literal.newInstance("~  ~~ ~~~(((~~~~a)))");
         assertNotEquals(literal.getUnprocessed(), "~ ~~  ~~~(((~~~~a)))");
-    }
-
-    @Test
-    void getTruthValue() {
-        literal = Literal.newInstance("banana");
-        literal.assign(true);
-        assertTrue(literal.getTruthValue());
-
-        literal = Literal.newInstance("~banana");
-        literal.assign(true);
-        assertFalse(literal.getTruthValue());
-
-        literal = Literal.newInstance("banana");
-        literal.assign(false);
-        assertFalse(literal.getTruthValue());
-
-        literal = Literal.newInstance("~banana");
-        literal.assign(false);
-        assertTrue(literal.getTruthValue());
-    }
-
-    @Test
-    void isAssigned() {
-        // test assigned
-        literal = Literal.newInstance("fish");
-        literal.assign(true);
-        assertTrue(literal.isAssigned());
-
-        literal = Literal.newInstance("~fish");
-        literal.assign(true);
-        assertTrue(literal.isAssigned());
-
-        literal = Literal.newInstance("fish");
-        literal.assign(false);
-        assertTrue(literal.isAssigned());
-
-        literal = Literal.newInstance("~fish");
-        literal.assign(false);
-        assertTrue(literal.isAssigned());
-
-        // test not assigned
-        literal = Literal.newInstance("sand");
-        assertFalse(literal.isAssigned());
-
-        literal = Literal.newInstance("~sand");
-        assertFalse(literal.isAssigned());
-    }
-
-    @Test
-    void fullEquals() {
-        // test equals
-        literal = Literal.newInstance("cv");
-        assertTrue(literal.fullEquals(Literal.newInstance("cv")));
-        literal = Literal.newInstance("~cv");
-        assertTrue(literal.fullEquals(Literal.newInstance("~cv")));
-        literal = Literal.newInstance("(((((((test)))))))");
-        assertTrue(literal.fullEquals(Literal.newInstance("test")));
-        literal = Literal.newInstance("(~(test))");
-        assertTrue(literal.fullEquals(Literal.newInstance("~test")));
-        literal = Literal.newInstance("~~~(what)");
-        assertTrue(literal.fullEquals(Literal.newInstance("((((~what))))")));
-        literal = Literal.newInstance("~~~~~~(~~~~(~~~(~~chicken)))");
-        assertTrue(literal.fullEquals(Literal.newInstance("~chicken")));
-        literal = Literal.newInstance("(~(~~~~((~~~magic))))");
-        assertTrue(literal.fullEquals(Literal.newInstance("magic")));
-
-        // test not equals
-        literal = Literal.newInstance("chicken");
-        assertFalse(literal.fullEquals(Literal.newInstance("~chickens")));
-        literal = Literal.newInstance("~chickenWings");
-        assertFalse(literal.fullEquals(Literal.newInstance("chicken")));
-        literal = Literal.newInstance("(((((((moon)))))))");
-        assertFalse(literal.fullEquals(Literal.newInstance("mom")));
-        literal = Literal.newInstance("(~(chickens))");
-        assertFalse(literal.fullEquals(Literal.newInstance("~chicken")));
-        literal = Literal.newInstance("~~~(why)");
-        assertFalse(literal.fullEquals(Literal.newInstance("((((whyWhy))))")));
-        literal = Literal.newInstance("~~~~~~(~~~~(~~~(~~easy)))");
-        assertFalse(literal.fullEquals(Literal.newInstance("easily")));
-        literal = Literal.newInstance("(~(~~~~((~~~magic))))");
-        assertFalse(literal.fullEquals(Literal.newInstance("magical")));
     }
 
     @Test

@@ -1,7 +1,10 @@
 package core.trees;
 
 import core.exceptions.InvalidInsertionException;
+import core.symbols.Literal;
 import core.symbols.Symbol;
+
+import java.util.Map;
 
 public class NegNode extends SingletonNode {
 
@@ -39,5 +42,11 @@ public class NegNode extends SingletonNode {
         if (mid == null) mid = node;
         else mid = mid.insert(node);
         return this;
+    }
+
+    @Override
+    public boolean isSatisfiable(Map<Literal, Boolean> interpretation, boolean truth_value) {
+        if (mid == null) throw new IllegalStateException("Checking satisfiability of Negation without literal");
+        else return mid.isSatisfiable(interpretation, !truth_value);
     }
 }

@@ -1,19 +1,16 @@
 package core.trees;
 
 import core.symbols.Symbol;
-import org.jetbrains.annotations.Contract;
 
-public abstract class Node implements NodeInsertion {
-    public Symbol value;
+public abstract class Node implements NodeInsertion, Satisfiable {
+    public Symbol node_value;
 
-    @Contract(pure = true)
     protected Node() {
         this(null);
     }
 
-    @Contract(pure = true)
     protected Node(Symbol v) {
-        value = v;
+        node_value = v;
     }
 
     protected String getSpaces(int depth) {

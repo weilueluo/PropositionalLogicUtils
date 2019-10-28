@@ -1,6 +1,9 @@
 package core.trees;
 
 import core.exceptions.InvalidInsertionException;
+import core.symbols.Literal;
+
+import java.util.Map;
 
 public class BoxNode extends BinaryNode {
 
@@ -11,9 +14,8 @@ public class BoxNode extends BinaryNode {
         super();
         head = null;
         closed = false;
-        this.value = null;
+        this.node_value = null;
     }
-
 
     @Override
     public Node insert(LitNode node) {
@@ -73,4 +75,9 @@ public class BoxNode extends BinaryNode {
                             + spaces + "|-)%n");
     }
 
+    @Override
+    public boolean isSatisfiable(Map<Literal, Boolean> interpretation, boolean truth_value) {
+        if (head == null) throw new IllegalStateException("Checking satisfiability of empty box node");
+        else return head.isSatisfiable(interpretation, truth_value);
+    }
 }

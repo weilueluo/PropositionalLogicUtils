@@ -33,5 +33,5 @@ public abstract class Symbol {
 
     public abstract int hashCode();
 
-    public abstract boolean equals(Symbol other);
+    public abstract boolean equals(Object other);
 }

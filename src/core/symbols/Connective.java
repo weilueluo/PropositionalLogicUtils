@@ -3,13 +3,14 @@ package core.symbols;
 import core.exceptions.InvalidSymbolException;
 import core.trees.ConnNode;
 import core.trees.Node;
-import org.jetbrains.annotations.Contract;
 
 import java.util.Objects;
 
 import static core.common.Utilities.stripAllSpaces;
 
 public class Connective extends Symbol {
+
+    public enum Type { IMPLIES, IFF, AND, OR }
 
     private final static Connective SINGLETON_IMPLIES;
     private final static Connective SINGLETON_IFF;
@@ -18,6 +19,7 @@ public class Connective extends Symbol {
     private final String unprocessed_str;
     private final int precedence;
     private int hashcode;
+    private Type type;
 
     static {
         SINGLETON_IFF = new Connective(IFF);
@@ -28,7 +30,6 @@ public class Connective extends Symbol {
 
     private String connective;
 
-    @Contract("null -> fail")
     private Connective(String str) throws InvalidSymbolException {
 
         if (str == null) {
@@ -49,18 +50,22 @@ public class Connective extends Symbol {
             case OR:
                 this.connective = OR;
                 this.precedence = 2;
+                type = Type.OR;
                 break;
             case AND:
                 this.connective = AND;
                 this.precedence = 3;
+                type = Type.AND;
                 break;
             case IMPLIES:
                 this.connective = IMPLIES;
                 this.precedence = 4;
+                type = Type.IMPLIES;
                 break;
             case IFF:
                 this.connective = IFF;
                 this.precedence = 5;
+                type = Type.IFF;
                 break;
             default:
                 throw new InvalidSymbolException(String.format("Connective \"%s\" is not recognised, use %s | %s | %s" +
@@ -70,7 +75,10 @@ public class Connective extends Symbol {
         hashcode = Objects.hashCode(getFull());
     }
 
-    @Contract("null -> fail")
+    public Type getType() {
+        return type;
+    }
+
     public static Connective newInstance(String str) {
         if (str == null) {
             throw new InvalidSymbolException("Connective can't be null");
@@ -91,10 +99,6 @@ public class Connective extends Symbol {
         throw new InvalidSymbolException(String.format("Connective \"%s\" is not recognised %n use %s | %s | %s | %s"
                 , str, OR, AND, IMPLIES, IFF));
 
-    }
-
-    public static Connective newInstance(char c) {
-        return newInstance(String.valueOf(c));
     }
 
     public int getPrecedence() {
@@ -132,7 +136,9 @@ public class Connective extends Symbol {
     }
 
     @Override
-    public boolean equals(Symbol other) {
-        return hashcode == other.hashCode();
+    public boolean equals(Object other) {
+        if (other instanceof Connective) {
+            return hashcode == other.hashCode();
+        } else return false;
     }
 }
