@@ -1,6 +1,8 @@
 package core.symbols;
 
 import core.exceptions.InvalidSymbolException;
+import core.trees.LitNode;
+import core.trees.Node;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -13,6 +15,11 @@ public class Literal extends Symbol {
 
     private Literal() {
     } // empty private constructor
+
+    @Override
+    public Node toNode() {
+        return new LitNode(this);
+    }
 
     /**
      * The core literal constructor for string
@@ -61,7 +68,7 @@ public class Literal extends Symbol {
      */
     @NotNull
     @Contract("null -> fail")
-    public static Literal factory(String str) throws InvalidSymbolException {
+    public static Literal newInstance(String str) throws InvalidSymbolException {
         // check null
         if (str == null) {
             throw new InvalidSymbolException("Given Literal is null");
@@ -150,7 +157,7 @@ public class Literal extends Symbol {
 
     @NotNull
     @Contract("_ -> new")
-    public static Literal factory(char c) {
+    public static Literal newInstance(char c) {
         if (Character.isLetter(c)) {
             String s = Character.toString(c);
             return new Literal(s, s, false);
@@ -163,14 +170,17 @@ public class Literal extends Symbol {
         GETTER METHODS BELOW
      */
 
+    @Override
     public String getRaw() {
         return this.rawLiteral;
     }
 
+    @Override
     public String getFull() {
         return this.fullLiteral;
     }
 
+    @Override
     public String getUnprocessed() {
         return this.unprocessedLiteral;
     }
@@ -246,7 +256,6 @@ public class Literal extends Symbol {
     /*
         COMPARATOR METHODS BELLOW
      */
-
 
     public boolean rawEquals(Literal other) {
         if (other == null) throw new InvalidSymbolException("Given other literal for rawEquals is null");
