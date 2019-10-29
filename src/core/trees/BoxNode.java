@@ -3,7 +3,11 @@ package core.trees;
 import core.exceptions.InvalidInsertionException;
 import core.symbols.Literal;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
+import static core.common.Utilities.printMap;
 
 public class BoxNode extends BinaryNode {
 
@@ -69,15 +73,14 @@ public class BoxNode extends BinaryNode {
 
     @Override
     public String toString(int depth) {
-        String spaces = getSpaces(depth);
-        return String.format(spaces + "|-(%n"
-                            + head.toString(depth + 1)
-                            + spaces + "|-)%n");
+        return head.toString(depth + 1);
     }
 
     @Override
     public boolean isSatisfiable(Map<Literal, Boolean> interpretation, boolean truth_value) {
-        if (head == null) throw new IllegalStateException("Checking satisfiability of empty box node");
-        else return head.isSatisfiable(interpretation, truth_value);
+        if (head == null) {
+            throw new IllegalStateException("Checking satisfiability of empty box node");
+        }
+        return head.isSatisfiable(interpretation, truth_value);
     }
 }

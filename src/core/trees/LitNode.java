@@ -3,7 +3,10 @@ package core.trees;
 import core.exceptions.InvalidInsertionException;
 import core.symbols.Literal;
 
+import java.util.List;
 import java.util.Map;
+
+import static core.common.Utilities.printMap;
 
 public class LitNode extends BinaryNode {
 
@@ -35,6 +38,9 @@ public class LitNode extends BinaryNode {
     @Override
     public boolean isSatisfiable(Map<Literal, Boolean> interpretation, boolean truth_value) {
         Literal lit = (Literal) node_value;
+        System.out.println("At Literal: " + lit.getFull());
+        printMap(interpretation);
+        System.out.println();
         if (lit.isTautology()) {
             return truth_value;
         } else if (lit.isContradiction()) {
@@ -47,5 +53,10 @@ public class LitNode extends BinaryNode {
             interpretation.put(lit, truth_value);
             return true;
         }
+    }
+
+    @Override
+    public String toString(int depth) {
+        return node_value.getFull();
     }
 }

@@ -17,9 +17,9 @@ public abstract class BinaryNode extends Node {
     }
 
     public String toString(int depth) {
-        String spaces = getSpaces(depth);
-        String left_str = left == null ? "" : left.toString(depth + 1);
-        String right_str = right == null ? "" : right.toString(depth + 1);
-        return String.format(spaces + "|-" + node_value.getFull() + "%n" + left_str + right_str);
+//        String spaces = getSpaces(depth);
+//        String left_str = left == null ? "" : left.toString(depth + 1);
+//        String right_str = right == null ? "" : right.toString(depth + 1);
+        return "(" + (left == null ? "" : left.toString(depth)) + node_value.getFull() + (right == null ? "" : right.toString(depth)) + ")";
     }
 }

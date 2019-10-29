@@ -17,7 +17,6 @@ public abstract class SingletonNode extends Node {
 
     @Override
     public String toString(int depth) {
-        String spaces = getSpaces(depth);
-        return String.format(spaces + "|- %s%n%s", node_value.getFull(), mid.toString(depth + 1));
+        return "(" + node_value.getFull() + mid.toString(depth + 1) + ")";
     }
 }
