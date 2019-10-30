@@ -1,6 +1,6 @@
 package core.exceptions;
 
-public class InternalException extends RuntimeException {
+public class InternalException extends Exception {
     public InternalException() {
         super();
     }

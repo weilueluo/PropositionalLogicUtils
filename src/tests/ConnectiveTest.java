@@ -14,36 +14,39 @@ class ConnectiveTest {
 
     @Test
     void normalFactory() {
-        conn = Connective.newInstance(Symbol.IFF);
+        conn = Connective.factory(Symbol.IFF);
         assertEquals(conn.toString(), Symbol.IFF);
 
-        conn = Connective.newInstance(Symbol.AND);
+        conn = Connective.factory(Symbol.AND);
         assertEquals(conn.toString(), Symbol.AND);
 
-        conn = Connective.newInstance(Symbol.OR);
+        conn = Connective.factory(Symbol.OR);
         assertEquals(conn.toString(), Symbol.OR);
 
-        conn = Connective.newInstance(Symbol.IMPLIES);
+        conn = Connective.factory(Symbol.IMPLIES);
         assertEquals(conn.toString(), Symbol.IMPLIES);
 
-        conn = Connective.newInstance("  -    >   ");
+        conn = Connective.factory("  -    >   ");
         assertEquals(conn.toString(), Symbol.IMPLIES);
 
-        conn = Connective.newInstance("  <  -   >  ");
+        conn = Connective.factory("  <  -   >  ");
         assertEquals(conn.toString(), Symbol.IFF);
 
-        conn = Connective.newInstance("  /    \\  ");
+        conn = Connective.factory("  /    \\  ");
         assertEquals(conn.toString(), Symbol.AND);
 
-        conn = Connective.newInstance("  \\      /  ");
+        conn = Connective.factory("  \\      /  ");
         assertEquals(conn.toString(), Symbol.OR);
     }
 
     @Test
     void invalidFactory() {
-        assertThrows(InvalidSymbolException.class, () -> Connective.newInstance("-  > <->"));
-        assertThrows(InvalidSymbolException.class, () -> Connective.newInstance("-->"));
-        assertThrows(InvalidSymbolException.class, () -> Connective.newInstance("//\\"));
-        assertThrows(InvalidSymbolException.class, () -> Connective.newInstance("\\///"));
+        assertThrows(InvalidSymbolException.class, () -> Connective.factory(Symbol.NEG));
+        assertThrows(InvalidSymbolException.class, () -> Connective.factory(Symbol.TAUTOLOGY));
+        assertThrows(InvalidSymbolException.class, () -> Connective.factory(Symbol.CONTRADICTION));
+        assertThrows(InvalidSymbolException.class, () -> Connective.factory("-  > <->"));
+        assertThrows(InvalidSymbolException.class, () -> Connective.factory("-->"));
+        assertThrows(InvalidSymbolException.class, () -> Connective.factory("//\\"));
+        assertThrows(InvalidSymbolException.class, () -> Connective.factory("\\///"));
     }
 }
