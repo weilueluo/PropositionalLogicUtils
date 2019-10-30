@@ -1,6 +1,6 @@
 package tests.common;
 
-import core.common.Parser;
+import core.Parser;
 import core.exceptions.InvalidFormulaException;
 import org.junit.jupiter.api.Test;
 
