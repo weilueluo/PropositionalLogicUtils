@@ -20,11 +20,18 @@ public class TruthTable extends Parser {
 
     public static void main(String[] args) {
         TruthTable truth_table = new TruthTable();
+
         Instant s = Instant.now();
         truth_table.evaluate("(Chicken /\\ (~Tiger -> Cat) <-> Chicken \\/ Tiger -> ~Cat /\\ (Snake <-> Chicken)) \\/ ~Tiger");
         Instant e = Instant.now();
-        System.out.println((String.format("Runtime: %sms", Duration.between(s, e).toMillis())));
-        System.out.println(truth_table.generate());
+        System.out.println((String.format("Evaluation Runtime: %sms", Duration.between(s, e).toMillis())));
+
+        s = Instant.now();
+        String table = truth_table.generate();
+        e = Instant.now();
+
+        System.out.println(table);
+        System.out.println((String.format("Truth Table Generation Runtime: %sms", Duration.between(s, e).toMillis())));
     }
 
     public String generate() {
