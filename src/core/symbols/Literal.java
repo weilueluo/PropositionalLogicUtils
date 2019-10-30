@@ -3,9 +3,6 @@ package core.symbols;
 import core.exceptions.InvalidSymbolException;
 import core.trees.LitNode;
 import core.trees.Node;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Objects;
@@ -17,7 +14,7 @@ public class Literal extends Symbol {
     private Boolean rawLiteralTruthValue, isRawTautology;
     private int hashcode;
 
-    public final static HashMap<String, Literal> created_instances = new HashMap<>();
+    private final static HashMap<String, Literal> created_instances = new HashMap<>();
 
     private Literal() {
     } // empty private constructor
@@ -74,8 +71,6 @@ public class Literal extends Symbol {
      * @return Literal Object
      * @throws InvalidSymbolException if null/empty/negation only/un-closed bracket/invalid character
      */
-    @NotNull
-    @Contract("null -> fail")
     public static Literal newInstance(String str) throws InvalidSymbolException {
         // check null
         if (str == null) {
@@ -198,8 +193,6 @@ public class Literal extends Symbol {
         return this.isNegated != this.rawLiteralTruthValue;  // same as isNegated ? !value : value;
     }
 
-    @Nullable
-    @Contract(pure = true)
     private Boolean getTruthValueOrNull() {
         if (this.rawLiteralTruthValue == null) return null;
         else return this.isNegated != this.rawLiteralTruthValue;

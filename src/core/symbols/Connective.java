@@ -3,7 +3,6 @@ package core.symbols;
 import core.exceptions.InvalidSymbolException;
 import core.trees.ConnNode;
 import core.trees.Node;
-import org.jetbrains.annotations.Contract;
 
 import static core.common.Utilities.stripAllSpaces;
 
@@ -28,7 +27,6 @@ public class Connective extends Symbol {
 
     private String connective;
 
-    @Contract("null -> fail")
     private Connective(String str) throws InvalidSymbolException {
 
         if (str == null) {
@@ -73,7 +71,6 @@ public class Connective extends Symbol {
 
     }
 
-    @Contract("null -> fail")
     public static Connective newInstance(String str) {
         if (str == null) {
             throw new InvalidSymbolException("Connective can't be null");
@@ -94,10 +91,6 @@ public class Connective extends Symbol {
         throw new InvalidSymbolException(String.format("Connective \"%s\" is not recognised %n use %s | %s | %s | %s"
                 , str, OR, AND, IMPLIES, IFF));
 
-    }
-
-    public static Connective newInstance(char c) {
-        return newInstance(String.valueOf(c));
     }
 
     public int getPrecedence() {

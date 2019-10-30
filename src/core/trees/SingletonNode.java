@@ -3,14 +3,14 @@ package core.trees;
 import core.symbols.Symbol;
 
 public abstract class SingletonNode extends Node {
-    protected Node mid;
+    Node mid;
 
     public SingletonNode() {
         super();
         mid = null;
     }
 
-    public SingletonNode(Symbol value) {
+    SingletonNode(Symbol value) {
         super(value);
         mid = null;
     }

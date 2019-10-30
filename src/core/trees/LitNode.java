@@ -2,7 +2,6 @@ package core.trees;
 
 import core.exceptions.InvalidInsertionException;
 import core.symbols.Literal;
-import org.jetbrains.annotations.NotNull;
 
 public class LitNode extends BinaryNode {
 
@@ -11,10 +10,6 @@ public class LitNode extends BinaryNode {
     public LitNode(Literal lit) {
         super(lit);
         literal = lit;
-    }
-
-    protected LitNode() {
-        super();
     }
 
     @Override
@@ -28,7 +23,7 @@ public class LitNode extends BinaryNode {
     }
 
     @Override
-    public Node insert(@NotNull ConnNode node) {
+    public Node insert(ConnNode node) {
         node.left = this;
         return node;
     }

@@ -2,7 +2,6 @@ package core.trees;
 
 import core.exceptions.InvalidInsertionException;
 import core.symbols.Connective;
-import org.jetbrains.annotations.NotNull;
 
 
 public class ConnNode extends BinaryNode {
@@ -15,11 +14,6 @@ public class ConnNode extends BinaryNode {
         this.precedence = conn.getPrecedence();
         this.type = conn.getType();
     }
-
-    public int getPrecedence() {
-        return precedence;
-    }
-
 
     @Override
     public Node insert(LitNode node) {
@@ -42,7 +36,7 @@ public class ConnNode extends BinaryNode {
     }
 
     @Override
-    public Node insert(@NotNull ConnNode node) {
+    public Node insert(ConnNode node) {
        if (node.precedence >= this.precedence) {
            node.left = this;
            return node;

@@ -5,10 +5,6 @@ import core.symbols.Symbol;
 
 public class NegNode extends SingletonNode {
 
-    public NegNode() {
-        super();
-    }
-
     public NegNode(Symbol value) {
         super(value);
     }

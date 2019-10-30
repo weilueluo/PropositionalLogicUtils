@@ -8,12 +8,13 @@ import java.time.Instant;
 
 public class TruthTable extends Parser {
 
-    private Literal[] literals;
-    private Node tree;
     private static final int literal_template_size = 10;
     private static final int tree_template_size = 15;
-    private final static String literal_truth_value_template = "|%"+ literal_template_size + "s";
+    private final static String literal_truth_value_template = "|%" + literal_template_size + "s";
     private final static String tree_truth_value_template = "|%" + tree_template_size + "s|";
+    private Literal[] literals;
+    private Node tree;
+    private StringBuilder curr_truth_table_builder;
 
     public TruthTable() {
 
@@ -23,7 +24,8 @@ public class TruthTable extends Parser {
         TruthTable truth_table = new TruthTable();
 
         Instant s = Instant.now();
-        truth_table.evaluate("(Chicken /\\ (~Tiger -> Snake) <-> Chicken \\/ Tiger -> ~Snake /\\ (Snake <-> Chicken)) <-> ~Tiger <-> Snake");
+        truth_table.evaluate("(Chicken /\\ (~F -> Snake) <-> Chicken \\/ Tiger -> T /\\ (Snake <-> Chicken)) <-> " +
+                "~Tiger <-> Snake");
         Instant e = Instant.now();
         System.out.println((String.format("Evaluation Runtime: %sms", Duration.between(s, e).toMillis())));
 
@@ -39,11 +41,12 @@ public class TruthTable extends Parser {
         ensureEvaluated();
         literals = getLiterals();
         tree = getTree();
-        String header = getHeader();
-        return header + generate(0);
+        curr_truth_table_builder = new StringBuilder();
+        generate(0);
+        return getHeader().append(curr_truth_table_builder).toString();
     }
 
-    private String getHeader() {
+    private StringBuilder getHeader() {
         StringBuilder cover = new StringBuilder();
         StringBuilder titles = new StringBuilder();
         for (Literal literal : literals) {
@@ -52,30 +55,36 @@ public class TruthTable extends Parser {
         }
         cover.append(String.format(tree_truth_value_template, "_".repeat(tree_template_size)));
         titles.append(String.format(tree_truth_value_template, "Truth Value"));
-        return cover.toString() + System.lineSeparator() + titles.toString() + System.lineSeparator();
+        return cover.append(System.lineSeparator()).append(titles).append(System.lineSeparator());
     }
 
-    private String generate(int index) {
+    private void generate(int index) {
         if (index == literals.length) {
-            return getCurrentRowString();
+            curr_truth_table_builder.append(getCurrentRowString());
+            return;
         }
-        StringBuilder sb = new StringBuilder();
-        literals[index].assign(true);
-        sb.append(generate(index + 1));
-        literals[index].assign(false);
-        sb.append(generate(index + 1));
-        return sb.toString();
+        Literal curr_literal = literals[index];
+        if (curr_literal.isContradiction() || curr_literal.isTautology()) {
+            generate(index + 1);
+        } else {
+            curr_literal.assign(true);
+            generate(index + 1);
+            curr_literal.assign(false);
+            generate(index + 1);
+        }
     }
 
-    private String getCurrentLiteralsString() {
+    private StringBuilder getCurrentLiteralsString() {
         StringBuilder sb = new StringBuilder();
         for (Literal literal : literals) {
             sb.append(String.format(literal_truth_value_template, literal.getTruthValue()));
         }
-        return sb.toString();
+        return sb;
     }
 
-    private String getCurrentRowString() {
-        return getCurrentLiteralsString() + String.format(tree_truth_value_template, tree.isTrue()) + System.lineSeparator();
+    private StringBuilder getCurrentRowString() {
+        return getCurrentLiteralsString()
+                .append(String.format(tree_truth_value_template, tree.isTrue()))
+                .append(System.lineSeparator());
     }
 }

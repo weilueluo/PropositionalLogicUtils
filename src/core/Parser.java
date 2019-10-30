@@ -8,7 +8,6 @@ import core.trees.BoxNode;
 import core.trees.ConnNode;
 import core.trees.LitNode;
 import core.trees.NegNode;
-import org.jetbrains.annotations.Contract;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -150,7 +149,6 @@ public class Parser {
         return unprocessed_str;
     }
 
-    @Contract(" _ -> fail")
     private void handle_error(String msg) {
         StringBuilder sb = new StringBuilder();
         sb.append(msg).append(System.lineSeparator()).append(unprocessed_str).append(System.lineSeparator());
