@@ -90,7 +90,7 @@ public class Parser {
         return literals;
     }
 
-    public void evaluate(String s) throws InvalidFormulaException {
+    public Parser evaluate(String s) throws InvalidFormulaException {
         if (s == null) {
             throw new InvalidFormulaException("Propositional Logic formula can't be null");
         }
@@ -142,6 +142,8 @@ public class Parser {
         if (!brackets_stack.empty()) {
             handle_error("Unclosed opening bracket");
         }
+
+        return this;
     }
 
     public String toString() {
@@ -245,7 +247,8 @@ public class Parser {
     private void handleBackwardSlash() {
         checkConnective(prev_token);
         if (index + 1 >= chars.length || chars[index + 1] != '/') {  // must be OR \/
-            handle_error(String.format("Invalid character: \"%s\", do you mean %s?", BACKWARD_SLASH, OR));
+            handle_error(String.format("Invalid character: \"%s\", do you mean \"%s\" or \"%s\"?",
+                    BACKWARD_SLASH, OR, AND));
         } else {
             prev_token = Token.CONNECTIVE;
             incomplete_clause = true;

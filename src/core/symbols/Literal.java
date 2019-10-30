@@ -171,17 +171,6 @@ public class Literal extends Symbol {
         return new_instance;
     }
 
-    @NotNull
-    @Contract("_ -> new")
-    public static Literal newInstance(char c) {
-        if (Character.isLetter(c)) {
-            String s = Character.toString(c);
-            return new Literal(s, s, false);
-        } else {
-            throw new InvalidSymbolException(String.format("Raw literal must be letters, not \"%s\"", c));
-        }
-    }
-
     /*
         GETTER METHODS BELOW
      */

@@ -19,12 +19,12 @@ public class TruthTable extends Parser {
     }  // empty
 
     public static void main(String[] args) {
-        TruthTable tb = new TruthTable();
+        TruthTable truth_table = new TruthTable();
         Instant s = Instant.now();
-        tb.evaluate("(Chicken /\\ (~Tiger -> Cat) <-> Chicken \\/ Tiger -> ~Cat /\\ (Snake <-> Chicken)) \\/ ~Tiger");
+        truth_table.evaluate("(Chicken /\\ (~Tiger -> Cat) <-> Chicken \\/ Tiger -> ~Cat /\\ (Snake <-> Chicken)) \\/ ~Tiger");
         Instant e = Instant.now();
         System.out.println((String.format("Runtime: %sms", Duration.between(s, e).toMillis())));
-        System.out.println(tb.generate());
+        System.out.println(truth_table.generate());
     }
 
     public String generate() {
