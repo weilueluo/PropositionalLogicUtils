@@ -1,9 +1,9 @@
 package core.common;
 
-public class Utilities {
+import java.util.stream.IntStream;
 
-    public static String stripAllSpaces(String str) {
-        return str.chars().filter(c -> c != ' ').collect(StringBuilder::new, StringBuilder::appendCodePoint,
-                StringBuilder::append).toString();
+public class Utilities {
+    public static IntStream revRange(int from, int to) {
+        return IntStream.range(from, to).map(i -> to - i + from - 1);
     }
 }
