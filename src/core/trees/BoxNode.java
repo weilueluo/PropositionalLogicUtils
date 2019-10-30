@@ -72,9 +72,16 @@ public class BoxNode extends BinaryNode {
     @Override
     public String toString(int depth) {
         String spaces = getSpaces(depth);
-        return String.format(spaces + "</>%n"
+        return String.format(spaces + "(%n"
                             + head.toString(depth)
-                            + spaces + "</>%n");
+                            + spaces + ")%n");
     }
 
+    @Override
+    public boolean isTrue() {
+        if (head == null) {
+            throw new IllegalStateException("Accessing truth value of empty bracket");
+        }
+        return head.isTrue();
+    }
 }

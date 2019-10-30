@@ -8,15 +8,18 @@ import org.jetbrains.annotations.NotNull;
 public class ConnNode extends BinaryNode {
 
     private final int precedence;
+    private final Connective.Type type;
 
     public ConnNode(Connective conn) {
         super(conn);
         this.precedence = conn.getPrecedence();
+        this.type = conn.getType();
     }
 
     public int getPrecedence() {
         return precedence;
     }
+
 
     @Override
     public Node insert(LitNode node) {
@@ -60,4 +63,20 @@ public class ConnNode extends BinaryNode {
         return this;
     }
 
+
+    @Override
+    public boolean isTrue() {
+        switch (type) {
+            case AND:
+                return left.isTrue() && right.isTrue();
+            case OR:
+                return left.isTrue() || right.isTrue();
+            case IFF:
+                return left.isTrue() == right.isTrue();
+            case IMPLIES:
+                return !left.isTrue() || right.isTrue();
+            default:
+                throw new IllegalStateException("Undefined Connective Type");
+        }
+    }
 }

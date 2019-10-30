@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Contract;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Stack;
+import java.util.*;
 
 import static core.symbols.Symbol.*;
 
@@ -27,8 +27,8 @@ import static core.symbols.Symbol.*;
  *
  * Time Complexity
  * The checking algorithm runs in one pass O(n)
- * The insertion algorithm runs in O(log n)
- * Overall this runs in O(n + log n) = O(n)
+ * The insertion algorithm runs in O(n log n)
+ * Overall this runs in O(n + n log n) = O(n log n)
  *
  * It parse by determining whether previous token can be follow by current token
  *
@@ -45,10 +45,12 @@ public class Parser {
     private char[] chars;  // char array form of current input string
     private Stack<Character> brackets_stack;
 
+    private List<Literal> literals;
+    private Set<Literal> literalPool;
 
     public Parser() {
-        reset(null);
-    }
+
+    } // empty
 
     public static void main(String[] args) {
         Parser p = new Parser();
@@ -57,7 +59,7 @@ public class Parser {
         Instant end = Instant.now();
         System.out.println((String.format("Runtime: %sms", Duration.between(start, end).toMillis())));
         System.out.println(p);
-//        System.out.println(p.getTree().toString(1));
+        System.out.println(p.getTree().toString(0));
     }
 
     private void reset(String newStr) {
@@ -69,10 +71,23 @@ public class Parser {
         brackets_stack = new Stack<>();
         prev_token = Token.START;
         chars = unprocessed_str == null ? null : unprocessed_str.toCharArray();
+        literals = new ArrayList<>();
+        literalPool = new HashSet<>();
     }
 
     public BoxNode getTree() {
+        ensureEvaluated();
         return curr_node;
+    }
+
+    void ensureEvaluated() {
+        if (curr_node == null) {
+            throw new IllegalStateException("There is no tree before evaluate is called");
+        }
+    }
+
+    public List<Literal> getLiterals() {
+        return literals;
     }
 
     public void evaluate(String s) throws InvalidFormulaException {
@@ -127,7 +142,6 @@ public class Parser {
         if (!brackets_stack.empty()) {
             handle_error("Unclosed opening bracket");
         }
-
     }
 
     public String toString() {
@@ -143,8 +157,13 @@ public class Parser {
         throw new InvalidFormulaException(sb.toString());
     }
 
-    private void insertLiteralToken(String lit) {
-        curr_node.insert(new LitNode(Literal.newInstance(lit)));
+    private void insertLiteralToken(String literal_str) {
+        Literal literal = Literal.newInstance(literal_str);
+        curr_node.insert(new LitNode(literal));
+        if (!literalPool.contains(literal)) {
+            literals.add(literal);
+            literalPool.add(literal);
+        }
     }
 
     private void insertConnectiveToken(String con) {

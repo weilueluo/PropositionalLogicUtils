@@ -1,10 +1,18 @@
 package core.trees;
 
+import com.sun.source.doctree.LinkTree;
+import core.TruthTable;
+import core.symbols.Literal;
 import core.symbols.Symbol;
 import org.jetbrains.annotations.Contract;
 
-public abstract class Node implements NodeInsertion {
-    public Symbol value;
+import java.util.ArrayList;
+import java.util.List;
+
+public abstract class Node implements NodeInsertion, TruthValue {
+    Symbol value;
+
+    private List<Literal> literals;
 
     @Contract(pure = true)
     protected Node() {
@@ -13,11 +21,12 @@ public abstract class Node implements NodeInsertion {
 
     @Contract(pure = true)
     protected Node(Symbol v) {
+        literals = new ArrayList<>();
         value = v;
     }
 
-    protected String getSpaces(int depth) {
-        return "-".repeat(depth * 3);
+    String getSpaces(int depth) {
+        return " ".repeat(depth * 3);
     }
 
     public abstract String toString(int depth);

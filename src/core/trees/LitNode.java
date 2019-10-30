@@ -6,8 +6,11 @@ import org.jetbrains.annotations.NotNull;
 
 public class LitNode extends BinaryNode {
 
+    private Literal literal;  // avoid casting
+
     public LitNode(Literal lit) {
         super(lit);
+        literal = lit;
     }
 
     protected LitNode() {
@@ -33,5 +36,10 @@ public class LitNode extends BinaryNode {
     @Override
     public Node insert(NegNode node) {
         throw new InvalidInsertionException("Inserting Negation immediately after Literal");
+    }
+
+    @Override
+    public boolean isTrue() {
+        return literal.getTruthValue();
     }
 }

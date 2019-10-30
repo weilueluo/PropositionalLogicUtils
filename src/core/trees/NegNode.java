@@ -40,4 +40,9 @@ public class NegNode extends SingletonNode {
         else mid = mid.insert(node);
         return this;
     }
+
+    @Override
+    public boolean isTrue() {
+        return !mid.isTrue();
+    }
 }

@@ -9,12 +9,15 @@ import static core.common.Utilities.stripAllSpaces;
 
 public class Connective extends Symbol {
 
+    public enum Type { IFF, AND, OR, IMPLIES }
+
     private final static Connective SINGLETON_IMPLIES;
     private final static Connective SINGLETON_IFF;
     private final static Connective SINGLETON_AND;
     private final static Connective SINGLETON_OR;
     private final String unprocessed_str;
     private final int precedence;
+    private final Type type;
 
     static {
         SINGLETON_IFF = new Connective(IFF);
@@ -44,18 +47,22 @@ public class Connective extends Symbol {
 
         switch (str) {
             case OR:
+                this.type = Type.OR;
                 this.connective = OR;
                 this.precedence = 2;
                 break;
             case AND:
+                this.type = Type.AND;
                 this.connective = AND;
                 this.precedence = 3;
                 break;
             case IMPLIES:
+                this.type = Type.IMPLIES;
                 this.connective = IMPLIES;
                 this.precedence = 4;
                 break;
             case IFF:
+                this.type = Type.IFF;
                 this.connective = IFF;
                 this.precedence = 5;
                 break;
@@ -120,5 +127,9 @@ public class Connective extends Symbol {
     @Override
     public String getUnprocessed() {
         return this.unprocessed_str;
+    }
+
+    public Type getType() {
+        return type;
     }
 }

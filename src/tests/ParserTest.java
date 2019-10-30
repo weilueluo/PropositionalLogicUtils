@@ -1,4 +1,4 @@
-package tests.common;
+package tests;
 
 import core.Parser;
 import core.exceptions.InvalidFormulaException;

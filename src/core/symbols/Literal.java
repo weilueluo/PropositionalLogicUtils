@@ -7,11 +7,17 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
+import java.util.Objects;
+
 public class Literal extends Symbol {
 
     private String rawLiteral, fullLiteral, unprocessedLiteral;
     private boolean isNegated;
     private Boolean rawLiteralTruthValue, isRawTautology;
+    private int hashcode;
+
+    public final static HashMap<String, Literal> created_instances = new HashMap<>();
 
     private Literal() {
     } // empty private constructor
@@ -50,6 +56,8 @@ public class Literal extends Symbol {
         } else {
             this.isRawTautology = this.rawLiteralTruthValue = null;
         }
+
+        hashcode = Objects.hashCode(this.rawLiteral);
     }
 
     /*
@@ -142,7 +150,13 @@ public class Literal extends Symbol {
         // so that we can easily print it if not valid
         String rawLiteral = String.valueOf(chars, startPointer, endPointer - startPointer + 1);
 
-        // now we check if the raw string characters are letters
+        // if this literal has already created then just return the old instance
+        if (created_instances.containsKey(rawLiteral)) {
+            return created_instances.get(rawLiteral);
+        }
+
+        // now we are creating new instance,
+        // check if the raw string characters are letters
         for (int i = startPointer; i <= endPointer; i++) {
             if (!Character.isLetter(chars[i])) {
                 // exception if not letter
@@ -152,7 +166,9 @@ public class Literal extends Symbol {
         }
 
         // everything checked, return Literal instance
-        return new Literal(str, rawLiteral, isNegated);
+        Literal new_instance = new Literal(str, rawLiteral, isNegated);
+        created_instances.put(rawLiteral, new_instance);
+        return new_instance;
     }
 
     @NotNull
@@ -246,7 +262,7 @@ public class Literal extends Symbol {
 
     // override previous raw literal value if it is not tautology/contradiction
     // else stays the same
-    public void assignOrUnchanged(boolean value) {
+    public void assignIfNotTF(boolean value) {
         if (!this.isTautology() && !this.isContradiction()) {
             this.rawLiteralTruthValue = value;
         }
@@ -272,6 +288,28 @@ public class Literal extends Symbol {
         else return this.rawLiteral.equals(other.rawLiteral)
                 && this.isNegated == other.isNegated
                 && this.getTruthValueOrNull() == other.getTruthValueOrNull();
+    }
+
+    @Override
+    public int hashCode() {
+        return hashcode;
+    }
+
+    public int compareTo(Object other) {
+        if (other instanceof Literal) {
+            return hashCode() - other.hashCode();
+        } else {
+            throw new InvalidSymbolException("Comparing non-Literal to Literal");
+        }
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (other instanceof Literal) {
+            return hashCode() == other.hashCode();
+        } else {
+            throw new InvalidSymbolException("Comparing non-Literal to Literal");
+        }
     }
 
 }
