@@ -1,2 +1,2 @@
 # Satis
-A Propositional Logic Satisfiability Checker
+A Propositional Logic Playground
