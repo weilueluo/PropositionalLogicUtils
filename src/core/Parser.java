@@ -8,11 +8,10 @@ import core.trees.BoxNode;
 import core.trees.ConnNode;
 import core.trees.LitNode;
 import core.trees.NegNode;
+import org.jetbrains.annotations.Contract;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Stack;
 
 import static core.symbols.Symbol.*;
@@ -28,23 +27,23 @@ import static core.symbols.Symbol.*;
  *
  * Time Complexity
  * The checking algorithm runs in one pass O(n)
- * The insertion algorithm runs in O(n log n)
- * Overall this runs in O(n + n log n) = O(n)
+ * The insertion algorithm runs in O(log n)
+ * Overall this runs in O(n + log n) = O(n)
  *
  * It parse by determining whether previous token can be follow by current token
  *
- *
+ * // TODO add checks to insertion?
  */
 public class Parser {
 
     private int index;  // current index
-    private Stack<BoxNode> box_nodes_stack;  // for saving previous context when creating new context for each bracket
-    private BoxNode curr_node;  // the current insertion context
+    private Stack<BoxNode> box_nodes_stack;  // for checking valid brackets
+    private BoxNode curr_node;
     private boolean incomplete_clause;  // a flag to check if parsing stopped half way of a complete clause
     private String unprocessed_str;  // user input string
     private Token prev_token;  // for checking if previous token followed by current token
     private char[] chars;  // char array form of current input string
-    private Stack<Character> brackets_stack;  // for checking valid bracket
+    private Stack<Character> brackets_stack;
 
 
     public Parser() {
@@ -54,16 +53,11 @@ public class Parser {
     public static void main(String[] args) {
         Parser p = new Parser();
         Instant start = Instant.now();
-        p.evaluate("((k\\/a)/\\(b\\/c<->d)->e)");
+        p.evaluate("(Chicken /\\ (~Tiger -> cat) <-> Snake \\/ Dog -> ~Cat /\\ (Snake <-> Duck)) \\/ ~Monkey");
         Instant end = Instant.now();
         System.out.println((String.format("Runtime: %sms", Duration.between(start, end).toMillis())));
         System.out.println(p);
-        System.out.println(p.getTree().toString(0));
-        Map<Literal, Boolean> interpretation = new HashMap<Literal, Boolean>();
-        System.out.println(p.getTree().isSatisfiable(interpretation, true));
-        for (Map.Entry e : interpretation.entrySet()) {
-            System.out.println(((Literal) e.getKey()).getRaw() + ": " + e.getValue());
-        }
+//        System.out.println(p.getTree().toString(1));
     }
 
     private void reset(String newStr) {
@@ -81,7 +75,7 @@ public class Parser {
         return curr_node;
     }
 
-    public Parser evaluate(String s) throws InvalidFormulaException {
+    public void evaluate(String s) throws InvalidFormulaException {
         if (s == null) {
             throw new InvalidFormulaException("Propositional Logic formula can't be null");
         }
@@ -134,13 +128,13 @@ public class Parser {
             handle_error("Unclosed opening bracket");
         }
 
-        return this;
     }
 
     public String toString() {
         return unprocessed_str;
     }
 
+    @Contract(" _ -> fail")
     private void handle_error(String msg) {
         StringBuilder sb = new StringBuilder();
         sb.append(msg).append(System.lineSeparator()).append(unprocessed_str).append(System.lineSeparator());

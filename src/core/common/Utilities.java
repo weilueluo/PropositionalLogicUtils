@@ -1,6 +1,5 @@
 package core.common;
 
-
 public class Utilities {
 
     public static String stripAllSpaces(String str) {

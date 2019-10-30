@@ -2,13 +2,16 @@ package core.trees;
 
 import core.exceptions.InvalidInsertionException;
 import core.symbols.Literal;
-
-import java.util.Map;
+import org.jetbrains.annotations.NotNull;
 
 public class LitNode extends BinaryNode {
 
     public LitNode(Literal lit) {
         super(lit);
+    }
+
+    protected LitNode() {
+        super();
     }
 
     @Override
@@ -22,7 +25,7 @@ public class LitNode extends BinaryNode {
     }
 
     @Override
-    public Node insert(ConnNode node) {
+    public Node insert(@NotNull ConnNode node) {
         node.left = this;
         return node;
     }
@@ -30,22 +33,5 @@ public class LitNode extends BinaryNode {
     @Override
     public Node insert(NegNode node) {
         throw new InvalidInsertionException("Inserting Negation immediately after Literal");
-    }
-
-    @Override
-    public boolean isSatisfiable(Map<Literal, Boolean> interpretation, boolean truth_value) {
-        Literal lit = (Literal) node_value;
-        if (lit.isTautology()) {
-            return truth_value;
-        } else if (lit.isContradiction()) {
-            return !truth_value;
-        }
-
-        if (interpretation.containsKey(node_value)) {
-            return interpretation.get(node_value) == truth_value;
-        } else {
-            interpretation.put(lit, truth_value);
-            return true;
-        }
     }
 }

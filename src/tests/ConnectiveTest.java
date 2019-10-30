@@ -41,6 +41,9 @@ class ConnectiveTest {
 
     @Test
     void invalidFactory() {
+        assertThrows(InvalidSymbolException.class, () -> Connective.newInstance(Symbol.NEG));
+        assertThrows(InvalidSymbolException.class, () -> Connective.newInstance(Symbol.TAUTOLOGY));
+        assertThrows(InvalidSymbolException.class, () -> Connective.newInstance(Symbol.CONTRADICTION));
         assertThrows(InvalidSymbolException.class, () -> Connective.newInstance("-  > <->"));
         assertThrows(InvalidSymbolException.class, () -> Connective.newInstance("-->"));
         assertThrows(InvalidSymbolException.class, () -> Connective.newInstance("//\\"));

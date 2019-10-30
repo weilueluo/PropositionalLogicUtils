@@ -3,8 +3,8 @@ package core.symbols;
 import core.exceptions.InvalidSymbolException;
 import core.trees.Node;
 import core.trees.NegNode;
-
-import java.util.Objects;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 import static core.common.Utilities.stripAllSpaces;
 
@@ -18,8 +18,8 @@ public class Negation extends Symbol {
 
     private String negation;
     private String unprocessed_str;
-    private int hashcode;
 
+    @Contract("null -> fail")
     private Negation(String s) {
         if (s == null) throw new InvalidSymbolException("Null is not negation");
         unprocessed_str = s;
@@ -29,7 +29,6 @@ public class Negation extends Symbol {
             throw new InvalidSymbolException(String.format("Given character is not negation: \"%s\", should be " +
                     "\"%s\"", s.charAt(0), NEG));
         negation = s;
-        hashcode = Objects.hashCode(getFull());
     }
 
     private Negation(char c) {
@@ -37,10 +36,9 @@ public class Negation extends Symbol {
             throw new InvalidSymbolException(String.format("\"%s\" is not a valid negation symbol", c));
         }
         negation = unprocessed_str = String.valueOf(c);
-        hashcode = Objects.hashCode(getFull());
     }
 
-    public static Negation newInstance(String s) {
+    public static Negation newInstance(@NotNull String s) {
         if (s.equals(String.valueOf(NEG))) {
             return NEGATION;
         } else {
@@ -74,17 +72,5 @@ public class Negation extends Symbol {
     @Override
     public String getUnprocessed() {
         return unprocessed_str;
-    }
-
-    @Override
-    public int hashCode() {
-        return hashcode;
-    }
-
-    @Override
-    public boolean equals(Object other) {
-        if (other instanceof Negation) {
-            return hashcode == other.hashCode();
-        } else return false;
     }
 }

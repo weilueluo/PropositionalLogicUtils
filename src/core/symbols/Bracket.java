@@ -4,15 +4,13 @@ import core.exceptions.InvalidNodeException;
 import core.exceptions.InvalidSymbolException;
 import core.trees.Node;
 
-import java.util.Objects;
-
 import static core.common.Utilities.stripAllSpaces;
 
 
 public class Bracket extends Symbol {
 
-    private static Bracket LEFT_BRACKET;
-    private static Bracket RIGHT_BRACKET;
+    public static Bracket LEFT_BRACKET;
+    public static Bracket RIGHT_BRACKET;
 
     static {
         LEFT_BRACKET = new Bracket(LBRACKET);
@@ -21,7 +19,6 @@ public class Bracket extends Symbol {
 
     private String bracket;
     private String unprocessed_str;
-    private int hashcode;
 
     private Bracket(char c) {
         if (c == LBRACKET || c == RBRACKET) {
@@ -30,7 +27,6 @@ public class Bracket extends Symbol {
             throw new InvalidSymbolException(String.format("Character is not one of \"%s\" or \"%s\"", LBRACKET,
                     RBRACKET));
         }
-        hashcode = Objects.hashCode(getFull());
     }
     private Bracket(String str) {
         if (str == null) throw new InvalidSymbolException("Null is not bracket");
@@ -48,7 +44,6 @@ public class Bracket extends Symbol {
                     RBRACKET));
         }
         this.bracket = str;
-        hashcode = Objects.hashCode(getFull());
     }
 
     public static Bracket newInstance(char c) {
@@ -81,18 +76,6 @@ public class Bracket extends Symbol {
     @Override
     public String getUnprocessed() {
         return unprocessed_str;
-    }
-
-    @Override
-    public int hashCode() {
-        return hashcode;
-    }
-
-    @Override
-    public boolean equals(Object other) {
-        if (other instanceof Bracket) {
-            return hashcode == other.hashCode();
-        } else return false;
     }
 
 }
