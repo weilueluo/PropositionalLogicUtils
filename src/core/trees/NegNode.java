@@ -6,8 +6,6 @@ import core.symbols.Symbol;
 
 import java.util.Map;
 
-import static core.common.Utilities.printMap;
-
 public class NegNode extends SingletonNode {
 
     public NegNode() {
@@ -48,9 +46,6 @@ public class NegNode extends SingletonNode {
 
     @Override
     public boolean isSatisfiable(Map<Literal, Boolean> interpretation, boolean truth_value) {
-        System.out.println("At Negation");
-        printMap(interpretation);
-        System.out.println();
         if (mid == null) throw new IllegalStateException("Checking satisfiability of Negation without literal");
         else return mid.isSatisfiable(interpretation, !truth_value);
     }

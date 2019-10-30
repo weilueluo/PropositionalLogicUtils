@@ -5,10 +5,7 @@ import core.symbols.Connective;
 import core.symbols.Literal;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-
-import static core.common.Utilities.printMap;
 
 
 public class ConnNode extends BinaryNode {
@@ -44,7 +41,7 @@ public class ConnNode extends BinaryNode {
 
     @Override
     public Node insert(ConnNode node) {
-        if (node.precedence > this.precedence) {
+        if (node.precedence >= this.precedence) {
             node.left = this;
             return node;
         } else {
@@ -64,36 +61,22 @@ public class ConnNode extends BinaryNode {
         return this;
     }
 
-
     @Override
     public boolean isSatisfiable(Map<Literal, Boolean> interpretation, boolean truth_value) {
-
-        Map<Literal, Boolean> copy = new HashMap<>(interpretation);
         switch (type) {
             case OR:
-                System.out.println("At OR");
-                printMap(interpretation);
-                System.out.println();
-                if (left.isSatisfiable(copy, truth_value) || right.isSatisfiable(copy, truth_value)) {
-                    interpretation.putAll(copy);
-                    return true;
-                } else {
-                    return false;
-                }
+                return left.isSatisfiable(interpretation, truth_value)
+                        || right.isSatisfiable(interpretation, truth_value);
             case AND:
-                System.out.println("At AND");
-                printMap(interpretation);
-                System.out.println();
-                if (left.isSatisfiable(copy, truth_value) && right.isSatisfiable(copy, truth_value)) {
-                    interpretation.putAll(copy);
+                Map<Literal, Boolean> copy_ = new HashMap<>(interpretation);
+                if (left.isSatisfiable(copy_, truth_value) && right.isSatisfiable(copy_, truth_value)) {
+                    interpretation.putAll(copy_);
                     return true;
                 } else {
                     return false;
                 }
             case IFF:
-                System.out.println("At IFF");
-                printMap(interpretation);
-                System.out.println();
+                Map<Literal, Boolean> copy = new HashMap<>(interpretation);
                 if (left.isSatisfiable(copy, truth_value) == right.isSatisfiable(copy, truth_value)) {
                     interpretation.putAll(copy);
                     return true;
@@ -101,18 +84,10 @@ public class ConnNode extends BinaryNode {
                     return false;
                 }
             case IMPLIES:
-                System.out.println("At IMPLIES");
-                printMap(interpretation);
-                System.out.println();
-                if (left.isSatisfiable(copy, !truth_value) || right.isSatisfiable(copy, truth_value)) {
-                    interpretation.putAll(copy);
-                    return true;
-                } else {
-                    return false;
-                }
+                return left.isSatisfiable(interpretation, !truth_value)
+                        || right.isSatisfiable(interpretation, truth_value);
             default:
                 throw new IllegalStateException("Invalid Connective type for checking satisfiability");
         }
     }
 }
-// ((a->(b/\c))<->(d<->(~(a->(c/\d)))))

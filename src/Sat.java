@@ -34,7 +34,7 @@ public class Sat {
         }
         System.out.println((String.format("Runtime: %sms", Duration.between(start, end).toMillis())));
 
-        System.out.println(parser.getTree().toString(0));
+//        System.out.println(parser.getTree().toString(0));
 
     }
 }
