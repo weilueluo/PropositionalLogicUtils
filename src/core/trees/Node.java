@@ -12,8 +12,6 @@ import java.util.List;
 public abstract class Node implements NodeInsertion, TruthValue {
     Symbol value;
 
-    private List<Literal> literals;
-
     @Contract(pure = true)
     protected Node() {
         this(null);
@@ -21,7 +19,6 @@ public abstract class Node implements NodeInsertion, TruthValue {
 
     @Contract(pure = true)
     protected Node(Symbol v) {
-        literals = new ArrayList<>();
         value = v;
     }
 

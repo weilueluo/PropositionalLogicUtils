@@ -18,17 +18,18 @@ import static core.symbols.Symbol.*;
 
 
 /**
- * This is a Propositional logic formula checker
+ * This is a Propositional logic formula parser
  *
  * Usage:
  * <code>new Parser().evaluate([formula])</code>
  * On fail it will throw a Runtime InvalidFormulaException
- * On success nothing happens and you can retrieve its parseTree<Node> through getTree method
+ * On success nothing happens and you can retrieve its parseTree<Node>/List of literal<Literal>
+ *     through getTree/getLiterals method
  *
  * Time Complexity
  * The checking algorithm runs in one pass O(n)
- * The insertion algorithm runs in O(n log n)
- * Overall this runs in O(n + n log n) = O(n log n)
+ * The insertion algorithm runs in the same pass O(n log n)
+ * Overall this runs in O(n log n)
  *
  * It parse by determining whether previous token can be follow by current token
  *
@@ -43,10 +44,9 @@ public class Parser {
     private String unprocessed_str;  // user input string
     private Token prev_token;  // for checking if previous token followed by current token
     private char[] chars;  // char array form of current input string
-    private Stack<Character> brackets_stack;
 
-    private List<Literal> literals;
     private Set<Literal> literalPool;
+    private Literal[] literals;
 
     public Parser() {
 
@@ -68,11 +68,10 @@ public class Parser {
         curr_node = new BoxNode();
         box_nodes_stack = new Stack<>();
         unprocessed_str = newStr;
-        brackets_stack = new Stack<>();
         prev_token = Token.START;
         chars = unprocessed_str == null ? null : unprocessed_str.toCharArray();
-        literals = new ArrayList<>();
         literalPool = new HashSet<>();
+        literals = null;
     }
 
     public BoxNode getTree() {
@@ -82,15 +81,16 @@ public class Parser {
 
     void ensureEvaluated() {
         if (curr_node == null) {
-            throw new IllegalStateException("There is no tree before evaluate is called");
+            throw new IllegalStateException("There is no tree/literal before evaluate is called");
         }
     }
 
-    public List<Literal> getLiterals() {
-        return literals;
+    public Literal[] getLiterals() {
+        ensureEvaluated();
+        return  literals;
     }
 
-    public Parser evaluate(String s) throws InvalidFormulaException {
+    public void evaluate(String s) throws InvalidFormulaException {
         if (s == null) {
             throw new InvalidFormulaException("Propositional Logic formula can't be null");
         }
@@ -139,11 +139,11 @@ public class Parser {
         if (incomplete_clause) {
             handle_error("Incomplete clause");
         }
-        if (!brackets_stack.empty()) {
+        if (!box_nodes_stack.empty()) {
             handle_error("Unclosed opening bracket");
         }
 
-        return this;
+        literals = literalPool.toArray(new Literal[0]);
     }
 
     public String toString() {
@@ -162,10 +162,7 @@ public class Parser {
     private void insertLiteralToken(String literal_str) {
         Literal literal = Literal.newInstance(literal_str);
         curr_node.insert(new LitNode(literal));
-        if (!literalPool.contains(literal)) {
-            literals.add(literal);
-            literalPool.add(literal);
-        }
+        literalPool.add(literal);
     }
 
     private void insertConnectiveToken(String con) {
@@ -207,7 +204,6 @@ public class Parser {
             handle_error("Left bracket not allowed here");
         }
         prev_token = Token.LBRACKET;
-        brackets_stack.push(LBRACKET);
         incomplete_clause = true;
         insertLeftBracketToken();
         index++;
@@ -217,7 +213,7 @@ public class Parser {
         if (prev_token != Token.LITERAL && prev_token != Token.RBRACKET) {
             handle_error("Right bracket not allowed here");
         }
-        if (brackets_stack.empty() || brackets_stack.pop() != LBRACKET) {
+        if (box_nodes_stack.empty() || box_nodes_stack.peek().isClosed()) {
             handle_error("Unopened closing bracket");
         }
         prev_token = Token.RBRACKET;
