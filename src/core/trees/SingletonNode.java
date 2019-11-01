@@ -2,13 +2,9 @@ package core.trees;
 
 import core.symbols.Symbol;
 
+
 public abstract class SingletonNode extends Node {
     Node mid;
-
-    public SingletonNode() {
-        super();
-        mid = null;
-    }
 
     SingletonNode(Symbol value) {
         super(value);
@@ -16,8 +12,10 @@ public abstract class SingletonNode extends Node {
     }
 
     @Override
-    public String toString(int depth) {
-        String spaces = getSpaces(depth);
-        return String.format(spaces + "|- %s%n%s", value.getFull(), mid.toString(depth + 1));
+    public StringBuilder toTreeStringBuilder(int depth) {
+        return new StringBuilder(getSpaces(depth))
+                .append("|- ")
+                .append(value.getFull()).append(System.lineSeparator())
+                .append(mid.toTreeStringBuilder(depth + 1));
     }
 }

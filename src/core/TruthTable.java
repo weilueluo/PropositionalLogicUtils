@@ -24,15 +24,18 @@ public class TruthTable extends Parser {
         TruthTable truth_table = new TruthTable();
 
         Instant s = Instant.now();
-        truth_table.evaluate("(Chicken /\\ (~F -> Snake) <-> Chicken \\/ Tiger -> T /\\ (Snake <-> Chicken)) <-> " +
-                "~Tiger <-> Snake");
+        truth_table.evaluate("a -> b");
         Instant e = Instant.now();
+
         System.out.println((String.format("Evaluation Runtime: %sms", Duration.between(s, e).toMillis())));
 
         s = Instant.now();
         String table = truth_table.generate();
         e = Instant.now();
+
         System.out.println(truth_table);
+        System.out.println(truth_table.getTree().toTreeString());
+        System.out.println(truth_table.getTree().toBracketString());
         System.out.println(table);
         System.out.println((String.format("Truth Table Generation Runtime: %sms", Duration.between(s, e).toMillis())));
     }
@@ -43,19 +46,30 @@ public class TruthTable extends Parser {
         tree = getTree();
         curr_truth_table_builder = new StringBuilder();
         generate(0);
-        return getHeader().append(curr_truth_table_builder).toString();
+        return getSeparator()
+                .append(getHeader())
+                .append(getSeparator())
+                .append(curr_truth_table_builder)
+                .append(getSeparator())
+                .toString();
+    }
+
+    private StringBuilder getSeparator() {
+        StringBuilder sb = new StringBuilder();
+        for (Literal literal : literals) {
+            sb.append(String.format(literal_truth_value_template, "-".repeat(literal_template_size)));
+        }
+        sb.append(String.format(tree_truth_value_template, "-".repeat(tree_template_size))).append(System.lineSeparator());
+        return sb;
     }
 
     private StringBuilder getHeader() {
-        StringBuilder cover = new StringBuilder();
         StringBuilder titles = new StringBuilder();
         for (Literal literal : literals) {
-            cover.append(String.format(literal_truth_value_template, "_".repeat(literal_template_size)));
             titles.append(String.format(literal_truth_value_template, literal.getRaw()));
         }
-        cover.append(String.format(tree_truth_value_template, "_".repeat(tree_template_size)));
-        titles.append(String.format(tree_truth_value_template, "Truth Value"));
-        return cover.append(System.lineSeparator()).append(titles).append(System.lineSeparator());
+        titles.append(String.format(tree_truth_value_template, "Truth Value")).append(System.lineSeparator());
+        return titles;
     }
 
     private void generate(int index) {

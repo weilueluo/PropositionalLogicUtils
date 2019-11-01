@@ -15,11 +15,9 @@ public class Negation extends Symbol {
     }
 
     private String negation;
-    private String unprocessed_str;
 
     private Negation(String s) {
         if (s == null) throw new InvalidSymbolException("Null is not negation");
-        unprocessed_str = s;
         s = stripAllSpaces(s);
         if (s.length() != 1) throw new InvalidSymbolException(String.format("Invalid negation: \"%s\"", s));
         if (s.charAt(0) != NEG)
@@ -32,7 +30,11 @@ public class Negation extends Symbol {
         if (c != NEG) {
             throw new InvalidSymbolException(String.format("\"%s\" is not a valid negation symbol", c));
         }
-        negation = unprocessed_str = String.valueOf(c);
+        negation = String.valueOf(c);
+    }
+
+    public static Negation getInstance() {
+        return NEGATION;
     }
 
     public static Negation newInstance(String s) {
@@ -56,10 +58,5 @@ public class Negation extends Symbol {
     @Override
     public String getFull() {
         return negation;
-    }
-
-    @Override
-    public String getUnprocessed() {
-        return unprocessed_str;
     }
 }

@@ -18,7 +18,7 @@ public class LitNode extends BinaryNode {
     }
 
     @Override
-    public Node insert(BoxNode node) {
+    public Node insert(BracketNode node) {
         throw new InvalidInsertionException("Inserting Left bracket immediately after Literal");
     }
 
@@ -31,6 +31,32 @@ public class LitNode extends BinaryNode {
     @Override
     public Node insert(NegNode node) {
         throw new InvalidInsertionException("Inserting Negation immediately after Literal");
+    }
+
+    @Override
+    public StringBuilder toBracketStringBuilder() {
+        return new StringBuilder(value.getFull());
+    }
+
+    @Override
+    protected void eliminateArrows() {
+        // no connective in literal
+    }
+
+    @Override
+    protected Node invertNegation() {
+        literal.invertNegation();
+        return this;
+    }
+
+    @Override
+    protected Node copy() {
+        return this;  // literal with the same name always refer to the same literal
+    }
+
+    @Override
+    protected StringBuilder toStringBuilder() {
+        return new StringBuilder(literal.getFull());
     }
 
     @Override

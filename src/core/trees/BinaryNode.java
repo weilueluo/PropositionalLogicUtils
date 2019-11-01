@@ -2,24 +2,44 @@ package core.trees;
 
 import core.symbols.Symbol;
 
+import static core.symbols.Symbol.LBRACKET;
+import static core.symbols.Symbol.RBRACKET;
+
 public abstract class BinaryNode extends Node {
 
-    protected Node left, right;
+    Node left, right;
 
-    public BinaryNode() {
+    BinaryNode() {
         super();
         left = right = null;
     }
 
-    public BinaryNode(Symbol value) {
+    BinaryNode(Symbol value) {
         super(value);
         left = right = null;
     }
 
-    public String toString(int depth) {
-        String spaces = getSpaces(depth);
-        String left_str = left == null ? "" : left.toString(depth + 1);
-        String right_str = right == null ? "" : right.toString(depth + 1);
-        return String.format(spaces + "|- " + value.getFull() + "%n" + left_str + right_str);
+    @Override
+    public StringBuilder toTreeStringBuilder(int depth) {
+        StringBuilder left_str = left == null ? new StringBuilder() : left.toTreeStringBuilder(depth + 1);
+        StringBuilder right_str = right == null ? new StringBuilder() : right.toTreeStringBuilder(depth + 1);
+        return new StringBuilder(getSpaces(depth))
+                        .append("|- ")
+                        .append(value.getFull())
+                        .append(System.lineSeparator())
+                        .append(left_str)
+                        .append(right_str);
+    }
+
+    @Override
+    public StringBuilder toBracketStringBuilder() {
+        StringBuilder left_sb = left == null ? new StringBuilder() : left.toBracketStringBuilder();
+        StringBuilder right_sb = right == null ? new StringBuilder() : right.toBracketStringBuilder();
+        return new StringBuilder()
+                .append(LBRACKET)
+                .append(left_sb)
+                .append(value.getFull())
+                .append(right_sb)
+                .append(RBRACKET);
     }
 }

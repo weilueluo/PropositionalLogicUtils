@@ -9,12 +9,12 @@ import java.util.Objects;
 
 public class Literal extends Symbol {
 
-    private String rawLiteral, fullLiteral, unprocessedLiteral;
+    private String rawLiteral;
     private boolean isNegated;
     private Boolean rawLiteralTruthValue, isRawTautology;
     private int hashcode;
 
-    private final static HashMap<String, Literal> created_instances = new HashMap<>();
+    private final static HashMap<Integer, Literal> created_instances = new HashMap<>();
 
     private Literal() {
     } // empty private constructor
@@ -30,17 +30,9 @@ public class Literal extends Symbol {
      * @param rawLiteral the literal in String type, must be valid, non-tautology, non-contradiction and striped
      * @param isNegated  if this literal is negated
      */
-    private Literal(String unprocessedLiteral, String rawLiteral, boolean isNegated) {
+    private Literal(String rawLiteral, boolean isNegated) {
 
-        this.unprocessedLiteral = unprocessedLiteral;
         this.rawLiteral = rawLiteral;
-
-        // full literal is literal without removing negated symbol if exists
-        if (isNegated) {
-            this.fullLiteral = NEG + rawLiteral;
-        } else {
-            this.fullLiteral = rawLiteral;
-        }
 
         this.isNegated = isNegated;
 
@@ -66,6 +58,10 @@ public class Literal extends Symbol {
      * This method return a Literal Object if given string is a valid representation of literal
      * This method sanitize input string before passing to actually constructor
      * Complexity is O(n)
+     *
+     * Note:
+     * The followings are different literal: ~P, P.
+     * But the followings are the same: P, ((((P)))), ~~P, ~~(((~~P))).
      *
      * @param str the input literal string
      * @return Literal Object
@@ -146,8 +142,9 @@ public class Literal extends Symbol {
         String rawLiteral = String.valueOf(chars, startPointer, endPointer - startPointer + 1);
 
         // if this literal has already created then just return the old instance
-        if (created_instances.containsKey(rawLiteral)) {
-            return created_instances.get(rawLiteral);
+        int key = Objects.hashCode(rawLiteral) ^ Objects.hashCode(isNegated);
+        if (created_instances.containsKey(key)) {
+            return created_instances.get(key);
         }
 
         // now we are creating new instance,
@@ -161,8 +158,8 @@ public class Literal extends Symbol {
         }
 
         // everything checked, return Literal instance
-        Literal new_instance = new Literal(str, rawLiteral, isNegated);
-        created_instances.put(rawLiteral, new_instance);
+        Literal new_instance = new Literal(rawLiteral, isNegated);
+        created_instances.put(key, new_instance);
         return new_instance;
     }
 
@@ -177,18 +174,13 @@ public class Literal extends Symbol {
 
     @Override
     public String getFull() {
-        return this.fullLiteral;
-    }
-
-    @Override
-    public String getUnprocessed() {
-        return this.unprocessedLiteral;
+        return isNegated ? NEG + getRaw() : getRaw();
     }
 
     public boolean getTruthValue() {
         if (this.rawLiteralTruthValue == null) {
             throw new IllegalStateException(String.format("Access truth value before assignment for literal: \"%s\"",
-                    this.unprocessedLiteral));
+                    getFull()));
         }
         return this.isNegated != this.rawLiteralTruthValue;  // same as isNegated ? !value : value;
     }
@@ -221,9 +213,9 @@ public class Literal extends Symbol {
     }
 
     public String toString() {
-        return String.format("Unprocessed String: %s,%nFull literal: %s,%nRaw literal: %s,%nNegated: %s,%n" +
+        return String.format("Full literal: %s,%nRaw literal: %s,%nNegated: %s,%n" +
                         "Tautology: %s,%nContradiction: %s,%nAssigned raw value: %s,%nTruth value: %s",
-                this.unprocessedLiteral, this.fullLiteral, this.rawLiteral, this.isNegated(), this.isTautology(),
+                this.getFull(), this.getRaw(), this.isNegated(), this.isTautology(),
                 this.isContradiction(), this.rawLiteralTruthValue, this.getTruthValueOrNull());
     }
 
@@ -240,6 +232,11 @@ public class Literal extends Symbol {
                     "Assign value to " + (this.isTautology() ? "tautology" : "contradiction") + " literal");
         }
         this.rawLiteralTruthValue = value;
+
+        int same_literal_with_diff_negation_hash = hashcode ^ Objects.hashCode(!isNegated);
+        if (created_instances.containsKey(same_literal_with_diff_negation_hash)) {
+            created_instances.get(same_literal_with_diff_negation_hash).rawLiteralTruthValue = value;
+        }
     }
 
     // override previous raw literal value if it is not tautology/contradiction
@@ -262,7 +259,7 @@ public class Literal extends Symbol {
 
     public boolean fullEquals(Literal other) {
         if (other == null) throw new InvalidSymbolException("Given literal for rawEquals is null");
-        else return this.fullLiteral.equals(other.fullLiteral);
+        else return this.getFull().equals(other.getFull());
     }
 
     public boolean equals(Literal other) {

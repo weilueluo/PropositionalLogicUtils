@@ -28,6 +28,4 @@ public abstract class Symbol {
     public abstract String getRaw();
 
     public abstract String getFull();
-
-    public abstract String getUnprocessed();
 }

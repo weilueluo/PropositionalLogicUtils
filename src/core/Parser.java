@@ -4,7 +4,7 @@ import core.exceptions.InvalidFormulaException;
 import core.symbols.Connective;
 import core.symbols.Literal;
 import core.symbols.Negation;
-import core.trees.BoxNode;
+import core.trees.BracketNode;
 import core.trees.ConnNode;
 import core.trees.LitNode;
 import core.trees.NegNode;
@@ -37,8 +37,8 @@ import static core.symbols.Symbol.*;
 public class Parser {
 
     private int index;  // current index
-    private Stack<BoxNode> box_nodes_stack;  // for checking valid brackets
-    private BoxNode curr_node;
+    private Stack<BracketNode> box_nodes_stack;  // for checking valid brackets
+    private BracketNode curr_node;
     private boolean incomplete_clause;  // a flag to check if parsing stopped half way of a complete clause
     private String unprocessed_str;  // user input string
     private Token prev_token;  // for checking if previous token followed by current token
@@ -58,13 +58,13 @@ public class Parser {
         Instant end = Instant.now();
         System.out.println((String.format("Runtime: %sms", Duration.between(start, end).toMillis())));
         System.out.println(p);
-        System.out.println(p.getTree().toString(0));
+        System.out.println(p.getTree().toTreeString());
     }
 
     private void reset(String newStr) {
         index = 0;
         incomplete_clause = true;
-        curr_node = new BoxNode();
+        curr_node = new BracketNode();
         box_nodes_stack = new Stack<>();
         unprocessed_str = newStr;
         prev_token = Token.START;
@@ -73,7 +73,7 @@ public class Parser {
         literals = null;
     }
 
-    public BoxNode getTree() {
+    public BracketNode getTree() {
         ensureEvaluated();
         return curr_node;
     }
@@ -86,7 +86,7 @@ public class Parser {
 
     public Literal[] getLiterals() {
         ensureEvaluated();
-        return  literals;
+        return literals;
     }
 
     public void evaluate(String s) throws InvalidFormulaException {
@@ -173,12 +173,12 @@ public class Parser {
 
     private void insertLeftBracketToken() {
         box_nodes_stack.push(curr_node);
-        curr_node = new BoxNode();
+        curr_node = new BracketNode();
     }
 
     private void insertRightBracketToken() {
         if (!box_nodes_stack.isEmpty()) {
-            BoxNode old = curr_node;
+            BracketNode old = curr_node;
             curr_node = box_nodes_stack.pop();
             old.close();
             curr_node.insert(old);

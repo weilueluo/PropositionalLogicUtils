@@ -22,11 +22,13 @@ class LiteralTest {
         assertFalse(literal.getTruthValue());
 
         // test negated literal
-        literal = Literal.newInstance("~p");
-        literal.assign(true);
-        assertFalse(literal.getTruthValue());
-        literal.assign(false);
+        Literal other_literal = Literal.newInstance("~p");
+        other_literal.assign(true);
+        assertFalse(other_literal.getTruthValue());
         assertTrue(literal.getTruthValue());
+        other_literal.assign(false);
+        assertTrue(other_literal.getTruthValue());
+        assertFalse(literal.getTruthValue());
     }
 
     @Test
@@ -305,45 +307,6 @@ class LiteralTest {
     }
 
     @Test
-    void getUnprocessed() {
-        // test true
-        literal = Literal.newInstance("where");
-        assertEquals(literal.getUnprocessed(), "where");
-        literal = Literal.newInstance("~where");
-        assertEquals(literal.getUnprocessed(), "~where");
-        literal = Literal.newInstance("((((((where))))))");
-        assertEquals(literal.getUnprocessed(), "((((((where))))))");
-        literal = Literal.newInstance("~~~~~~((where))");
-        assertEquals(literal.getUnprocessed(), "~~~~~~((where))");
-        literal = Literal.newInstance("~(~(~~~(~(~(kind)))))");
-        assertEquals(literal.getUnprocessed(), "~(~(~~~(~(~(kind)))))");
-        literal = Literal.newInstance("(     (~~~~(~~~~Jokes))   )");
-        assertEquals(literal.getUnprocessed(), "(     (~~~~(~~~~Jokes))   )");
-        literal = Literal.newInstance("~~~~~~     ~united  ");
-        assertEquals(literal.getUnprocessed(), "~~~~~~     ~united  ");
-        literal = Literal.newInstance("~   ~~~(((~~~~a)))");
-        assertEquals(literal.getUnprocessed(), "~   ~~~(((~~~~a)))");
-
-        // test false
-        literal = Literal.newInstance("~where");
-        assertNotEquals(literal.getUnprocessed(), "~~where");
-        literal = Literal.newInstance("which");
-        assertNotEquals(literal.getUnprocessed(), "~~which");
-        literal = Literal.newInstance("(((there)))");
-        assertNotEquals(literal.getUnprocessed(), "((there))");
-        literal = Literal.newInstance("~~~~~~((shut))");
-        assertNotEquals(literal.getUnprocessed(), "~~~~~~(((shut)))");
-        literal = Literal.newInstance("~(~(~~~(~(~(way)))))");
-        assertNotEquals(literal.getUnprocessed(), "~(~(~~~(~(~way))))");
-        literal = Literal.newInstance("(     (~~~~(~~~~jokes))   )");
-        assertNotEquals(literal.getUnprocessed(), "(     (~~~~(~~~~Jokes))   )");
-        literal = Literal.newInstance("~~~~~~     ~united  ");
-        assertNotEquals(literal.getUnprocessed(), "~~~~~~     ~unite  ");
-        literal = Literal.newInstance("~  ~~ ~~~(((~~~~a)))");
-        assertNotEquals(literal.getUnprocessed(), "~ ~~  ~~~(((~~~~a)))");
-    }
-
-    @Test
     void getTruthValue() {
         literal = Literal.newInstance("banana");
         literal.assign(true);
@@ -427,19 +390,19 @@ class LiteralTest {
     @Test
     void testToString() {
         literal = Literal.newInstance("(~test)");
-        assertEquals(literal.toString(), String.format("Unprocessed String: (~test),%nFull literal: ~test,%nRaw literal: test,%nNegated: true,%n" +
+        assertEquals(literal.toString(), String.format("Full literal: ~test,%nRaw literal: test,%nNegated: true,%n" +
                 "Tautology: false,%nContradiction: false,%nAssigned raw value: null,%nTruth value: null"));
 
         literal = Literal.newInstance("(test)");
-        assertEquals(literal.toString(), String.format("Unprocessed String: (test),%nFull literal: test,%nRaw literal: test,%nNegated: false,%n" +
+        assertEquals(literal.toString(), String.format("Full literal: test,%nRaw literal: test,%nNegated: false,%n" +
                 "Tautology: false,%nContradiction: false,%nAssigned raw value: null,%nTruth value: null"));
 
         literal = Literal.newInstance("(T)");
-        assertEquals(literal.toString(), String.format("Unprocessed String: (T),%nFull literal: T,%nRaw literal: T,%nNegated: false,%n" +
+        assertEquals(literal.toString(), String.format("Full literal: T,%nRaw literal: T,%nNegated: false,%n" +
                 "Tautology: true,%nContradiction: false,%nAssigned raw value: true,%nTruth value: true"));
 
         literal = Literal.newInstance("(~T)");
-        assertEquals(literal.toString(), String.format("Unprocessed String: (~T),%nFull literal: ~T,%nRaw literal: T,%nNegated: true,%n" +
+        assertEquals(literal.toString(), String.format("Full literal: ~T,%nRaw literal: T,%nNegated: true,%n" +
                 "Tautology: false,%nContradiction: true,%nAssigned raw value: true,%nTruth value: false"));
     }
 }

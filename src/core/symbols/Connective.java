@@ -14,7 +14,6 @@ public class Connective extends Symbol {
     private final static Connective SINGLETON_IFF;
     private final static Connective SINGLETON_AND;
     private final static Connective SINGLETON_OR;
-    private final String unprocessed_str;
     private final int precedence;
     private final Type type;
 
@@ -32,8 +31,6 @@ public class Connective extends Symbol {
         if (str == null) {
             throw new InvalidSymbolException("Connective can't be null");
         }
-
-        this.unprocessed_str = str;
 
         // remove all whitespaces
         str = str.chars().filter(c -> c != ' ').collect(StringBuilder::new, StringBuilder::appendCodePoint,
@@ -69,6 +66,37 @@ public class Connective extends Symbol {
                         " | %s instead", str, OR, AND, IMPLIES, IFF));
         }
 
+    }
+
+    public static Connective getImpliesInstance() {
+        return SINGLETON_IMPLIES;
+    }
+
+    public static Connective getIffInstance() {
+        return SINGLETON_IFF;
+    }
+
+    public static Connective getAndInstance() {
+        return SINGLETON_AND;
+    }
+
+    public static Connective getOrInstance() {
+        return SINGLETON_OR;
+    }
+
+    public static Connective getInstance(Type type) {
+        switch (type) {
+            case OR:
+                return SINGLETON_OR;
+            case AND:
+                return SINGLETON_AND;
+            case IMPLIES:
+                return SINGLETON_IMPLIES;
+            case IFF:
+                return SINGLETON_IFF;
+            default:
+                throw new IllegalStateException("Unrecognised connective type");
+        }
     }
 
     public static Connective newInstance(String str) {
@@ -115,11 +143,6 @@ public class Connective extends Symbol {
     @Override
     public String getFull() {
         return getRaw();
-    }
-
-    @Override
-    public String getUnprocessed() {
-        return this.unprocessed_str;
     }
 
     public Type getType() {

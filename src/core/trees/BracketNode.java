@@ -2,18 +2,20 @@ package core.trees;
 
 import core.exceptions.InvalidInsertionException;
 
-public class BoxNode extends BinaryNode {
+import static core.symbols.Symbol.LBRACKET;
+import static core.symbols.Symbol.RBRACKET;
 
-    private Node head;
-    private boolean closed = false;
+public class BracketNode extends BinaryNode {
 
-    public BoxNode() {
+    Node head;
+    private boolean closed;
+
+    public BracketNode() {
         super();
         head = null;
         closed = false;
         this.value = null;
     }
-
 
     @Override
     public Node insert(LitNode node) {
@@ -27,7 +29,7 @@ public class BoxNode extends BinaryNode {
     }
 
     @Override
-    public Node insert(BoxNode node) {
+    public Node insert(BracketNode node) {
         if (closed) {
             throw new InvalidInsertionException("Inserting Left bracket immediately after Right bracket");
         } else {
@@ -70,11 +72,49 @@ public class BoxNode extends BinaryNode {
     }
 
     @Override
-    public String toString(int depth) {
+    public StringBuilder toTreeStringBuilder(int depth) {
         String spaces = getSpaces(depth);
-        return String.format(spaces + "(%n"
-                            + head.toString(depth)
-                            + spaces + ")%n");
+        return new StringBuilder(spaces)
+                .append(LBRACKET).append(System.lineSeparator())
+                .append(head.toTreeStringBuilder(depth))
+                .append(spaces)
+                .append(RBRACKET).append(System.lineSeparator());
+    }
+
+    @Override
+    public StringBuilder toBracketStringBuilder() {
+        StringBuilder left_sb = left == null ? new StringBuilder() : left.toBracketStringBuilder();
+        StringBuilder right_sb = right == null ? new StringBuilder() : right.toBracketStringBuilder();
+        return new StringBuilder()
+                .append(LBRACKET)
+                .append(left_sb)
+                .append(head.toBracketString())
+                .append(right_sb)
+                .append(RBRACKET);
+    }
+
+    @Override
+    protected void eliminateArrows() {
+        head.eliminateArrows();
+    }
+
+    @Override
+    protected Node invertNegation() {
+        head = head.invertNegation();
+        return this;
+    }
+
+    @Override
+    protected Node copy() {
+        return head.copy();
+    }
+
+    @Override
+    protected StringBuilder toStringBuilder() {
+        return new StringBuilder()
+                .append(LBRACKET)
+                .append(head.toStringBuilder())
+                .append(RBRACKET);
     }
 
     @Override
