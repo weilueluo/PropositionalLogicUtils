@@ -96,6 +96,9 @@ class ParserTest {
         assertThrows(InvalidFormulaException.class, () -> parser.evaluate("~~"));
         assertThrows(InvalidFormulaException.class, () -> parser.evaluate("~~~~~"));
         assertThrows(InvalidFormulaException.class, () -> parser.evaluate("~a b"));
+        assertThrows(InvalidFormulaException.class, () -> parser.evaluate("~(a))"));
+        assertThrows(InvalidFormulaException.class, () -> parser.evaluate("(a) )"));
+        assertThrows(InvalidFormulaException.class, () -> parser.evaluate("())"));
         assertThrows(InvalidFormulaException.class, () -> parser.evaluate("a()"));
         assertThrows(InvalidFormulaException.class, () -> parser.evaluate("()a"));
         assertThrows(InvalidFormulaException.class, () -> parser.evaluate("a (/\\ b)"));

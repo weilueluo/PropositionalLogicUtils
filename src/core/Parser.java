@@ -37,7 +37,7 @@ import static core.symbols.Symbol.*;
 public class Parser {
 
     private int index;  // current index
-    private Stack<BracketNode> box_nodes_stack;  // for checking valid brackets
+    private Stack<BracketNode> bracket_nodes_stack;  // for checking valid brackets
     private BracketNode curr_node;
     private boolean incomplete_clause;  // a flag to check if parsing stopped half way of a complete clause
     private String unprocessed_str;  // user input string
@@ -65,7 +65,7 @@ public class Parser {
         index = 0;
         incomplete_clause = true;
         curr_node = new BracketNode();
-        box_nodes_stack = new Stack<>();
+        bracket_nodes_stack = new Stack<>();
         unprocessed_str = newStr;
         prev_token = Token.START;
         chars = unprocessed_str == null ? null : unprocessed_str.toCharArray();
@@ -138,10 +138,10 @@ public class Parser {
         if (incomplete_clause) {
             handle_error("Incomplete clause");
         }
-        if (!box_nodes_stack.empty()) {
+        if (!bracket_nodes_stack.empty()) {
             handle_error("Unclosed opening bracket");
         }
-
+        curr_node.close();
         literals = literalPool.toArray(new Literal[0]);
     }
 
@@ -172,19 +172,16 @@ public class Parser {
     }
 
     private void insertLeftBracketToken() {
-        box_nodes_stack.push(curr_node);
+        bracket_nodes_stack.push(curr_node);
         curr_node = new BracketNode();
     }
 
     private void insertRightBracketToken() {
-        if (!box_nodes_stack.isEmpty()) {
-            BracketNode old = curr_node;
-            curr_node = box_nodes_stack.pop();
-            old.close();
-            curr_node.insert(old);
-        } else {
-            curr_node.close();
-        }
+        // box_nodes_stack should already be checked is not empty by handle right bracket
+        BracketNode old = curr_node;
+        curr_node = bracket_nodes_stack.pop();
+        old.close();
+        curr_node.insert(old);
     }
 
     private void handleNegation() {
@@ -211,7 +208,7 @@ public class Parser {
         if (prev_token != Token.LITERAL && prev_token != Token.RBRACKET) {
             handle_error("Right bracket not allowed here");
         }
-        if (box_nodes_stack.empty() || box_nodes_stack.peek().isClosed()) {
+        if (bracket_nodes_stack.empty() || bracket_nodes_stack.peek().isClosed()) {
             handle_error("Unopened closing bracket");
         }
         prev_token = Token.RBRACKET;

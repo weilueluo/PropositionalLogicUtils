@@ -13,6 +13,16 @@ class LiteralTest {
     private Literal literal;
 
     @Test
+    void testCacheInstance() {
+        Literal literal = Literal.newInstance("P");
+        literal.assign(false);
+        Literal another = Literal.newInstance("~P");
+        another.invertNegation();
+        another.assign(true);
+        assertTrue(literal.getTruthValue());
+    }
+
+    @Test
     void assign() {
         // test not negated literal
         literal = Literal.newInstance("p");

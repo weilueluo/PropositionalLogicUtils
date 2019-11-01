@@ -1,5 +1,6 @@
 package core.trees;
 
+import core.exceptions.InvalidNodeException;
 import core.symbols.Symbol;
 
 import static core.symbols.Symbol.LBRACKET;
@@ -9,13 +10,11 @@ public abstract class BinaryNode extends Node {
 
     Node left, right;
 
-    BinaryNode() {
-        super();
-        left = right = null;
-    }
-
     BinaryNode(Symbol value) {
         super(value);
+        if (value == null) {
+            throw new InvalidNodeException("Constructing Binary node with null symbol");
+        }
         left = right = null;
     }
 

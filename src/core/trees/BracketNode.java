@@ -19,7 +19,7 @@ public class BracketNode extends Node {
 
     @Override
     public Node insert(LitNode node) {
-        if (closed) {
+        if (isClosed()) {
             throw new InvalidInsertionException("Inserting Literal immediately after Right bracket");
         } else {
             if (head == null) head = node;
@@ -30,7 +30,7 @@ public class BracketNode extends Node {
 
     @Override
     public Node insert(BracketNode node) {
-        if (closed) {
+        if (isClosed()) {
             throw new InvalidInsertionException("Inserting Left bracket immediately after Right bracket");
         } else {
             if (head == null) head = node;
@@ -41,7 +41,7 @@ public class BracketNode extends Node {
 
     @Override
     public Node insert(ConnNode node) {
-        if (closed) {
+        if (isClosed()) {
             node.left = this;
             return node;
         } else {
@@ -53,7 +53,7 @@ public class BracketNode extends Node {
 
     @Override
     public Node insert(NegNode node) {
-        if (closed) {
+        if (isClosed()) {
             throw new InvalidInsertionException("Inserting Negation immediately after Right bracket");
         } else {
             if (head == null) head = node;
@@ -63,7 +63,7 @@ public class BracketNode extends Node {
     }
 
     public void close() {
-        if (closed) throw new IllegalStateException("This bracket node is already closed");
+        if (isClosed()) throw new IllegalStateException("This bracket node is already closed");
         else closed = true;
     }
 
@@ -73,56 +73,63 @@ public class BracketNode extends Node {
 
     @Override
     public StringBuilder toTreeStringBuilder(int depth) {
+        StringBuilder head_sb = head == null ? new StringBuilder() : head.toTreeStringBuilder(depth);
         String spaces = getSpaces(depth);
         return new StringBuilder(spaces)
                 .append(LBRACKET).append(System.lineSeparator())
-                .append(head.toTreeStringBuilder(depth))
+                .append(head_sb)
                 .append(spaces)
                 .append(RBRACKET).append(System.lineSeparator());
     }
 
     @Override
     public StringBuilder toBracketStringBuilder() {
+        StringBuilder head_sb = head == null ? new StringBuilder() : head.toBracketStringBuilder();
         return new StringBuilder()
                 .append(LBRACKET)
-                .append(head.toBracketString())
+                .append(head_sb)
                 .append(RBRACKET);
+    }
+
+    private void ensureComplete() {
+        if (head == null) throw new IllegalStateException("Empty bracket: " + toString());
+        else if (!isClosed()) throw new IllegalStateException("Unclosed bracket node: " + toString());
     }
 
     @Override
     protected void eliminateArrows() {
+        ensureComplete();
         head.eliminateArrows();
     }
 
     @Override
     protected Node invertNegation() {
+        ensureComplete();
         head = head.invertNegation();
         return this;
     }
 
     @Override
     protected Node copy() {
+        ensureComplete();
         BracketNode new_node = new BracketNode();
         new_node.head = head.copy();
-        if (closed) {
-            new_node.close();
-        }
+        new_node.close();
         return new_node;
     }
 
     @Override
     protected StringBuilder toStringBuilder() {
+        StringBuilder head_sb = head == null ? new StringBuilder() : head.toStringBuilder();
         return new StringBuilder()
                 .append(LBRACKET)
-                .append(head.toStringBuilder())
+                .append(head_sb)
                 .append(RBRACKET);
     }
 
     @Override
     public boolean isTrue() {
-        if (head == null) {
-            throw new IllegalStateException("Accessing truth value of empty bracket");
-        }
+        ensureComplete();
         return head.isTrue();
     }
 }

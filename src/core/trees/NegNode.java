@@ -1,7 +1,7 @@
 package core.trees;
 
 import core.exceptions.InvalidInsertionException;
-import core.symbols.Connective;
+import core.exceptions.InvalidNodeException;
 import core.symbols.Negation;
 import core.symbols.Symbol;
 
@@ -15,71 +15,70 @@ public class NegNode extends SingletonNode {
 
     @Override
     public Node insert(LitNode node) {
-        if (mid == null) mid = node;
-        else mid = mid.insert(node);
+        if (descendant == null) descendant = node;
+        else descendant = descendant.insert(node);
         return this;
     }
 
     @Override
     public Node insert(BracketNode node) {
-        if (mid == null) mid = node;
-        else mid = mid.insert(node);
+        if (descendant == null) descendant = node;
+        else descendant = descendant.insert(node);
         return this;
     }
 
     @Override
     public Node insert(ConnNode node) {
-        if (mid == null) throw new InvalidInsertionException("Inserting Connective immediately after Negation");
+        if (descendant == null) throw new InvalidInsertionException("Inserting Connective immediately after Negation");
         node.left = this;
         return node;
     }
 
     @Override
     public Node insert(NegNode node) {
-        if (mid == null) mid = node;
-        else mid = mid.insert(node);
+        if (descendant == null) descendant = node;
+        else descendant = descendant.insert(node);
         return this;
     }
 
     @Override
     public StringBuilder toBracketStringBuilder() {
-        if (mid instanceof LitNode) {
+        if (descendant instanceof LitNode) {  // avoid too many brackets, so no bracket for literal
             return new StringBuilder(value.getFull())
-                    .append(mid.toBracketStringBuilder());
+                    .append(descendant.toBracketStringBuilder());
         } else {
             return new StringBuilder(value.getFull())
                 .append(LBRACKET)
-                .append(mid.toBracketStringBuilder())
+                .append(descendant.toBracketStringBuilder())
                 .append(RBRACKET);
         }
     }
 
     @Override
     protected void eliminateArrows() {
-        mid.eliminateArrows();
+        descendant.eliminateArrows();
     }
 
     @Override
     protected Node invertNegation() {
-        return mid;  // just remove this negation node
+        return descendant;  // just remove this negation node
     }
 
     @Override
     protected Node copy() {
+        if (descendant == null) throw new InvalidNodeException("Copying a negation without descendant");
         NegNode new_node = new NegNode(Negation.getInstance());
-        if (mid != null) {
-            new_node.mid = mid.copy();
-        }
+        new_node.descendant = descendant.copy();
         return new_node;
     }
 
     @Override
     protected StringBuilder toStringBuilder() {
-        return new StringBuilder().append(NEG).append(mid.toStringBuilder());
+        return new StringBuilder().append(NEG).append(descendant.toStringBuilder());
     }
 
     @Override
     public boolean isTrue() {
-        return !mid.isTrue();
+        return !descendant.isTrue();
     }
 }

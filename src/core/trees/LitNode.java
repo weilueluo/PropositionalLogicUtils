@@ -1,6 +1,7 @@
 package core.trees;
 
 import core.exceptions.InvalidInsertionException;
+import core.exceptions.InvalidNodeException;
 import core.symbols.Literal;
 
 public class LitNode extends BinaryNode {
@@ -24,6 +25,7 @@ public class LitNode extends BinaryNode {
 
     @Override
     public Node insert(ConnNode node) {
+        if (node == null) throw new InvalidNodeException("Connective node given is null");
         node.left = this;
         return node;
     }
@@ -40,7 +42,7 @@ public class LitNode extends BinaryNode {
 
     @Override
     protected void eliminateArrows() {
-        // no connective in literal
+        // no arrow-like connective in literal
     }
 
     @Override

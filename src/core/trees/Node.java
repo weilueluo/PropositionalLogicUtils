@@ -1,6 +1,8 @@
 package core.trees;
 
 import core.TruthTable;
+import core.exceptions.InvalidNodeException;
+import core.exceptions.InvalidSymbolException;
 import core.symbols.Symbol;
 
 import java.time.Duration;
@@ -49,7 +51,6 @@ public abstract class Node implements NodeInsertion, TruthValue {
     public static void main(String[] args) {
         var parser = new TruthTable();
         parser.evaluate("(a /\\ (~b -> a) <-> c \\/ b -> ~a /\\ (c <-> a)) \\/ ~b");
-        System.out.println(parser.getTree().toTreeString());
 
         System.out.println("Before eliminate arrow");
         System.out.println(parser.getTree());

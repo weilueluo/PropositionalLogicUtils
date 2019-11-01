@@ -60,12 +60,18 @@ public class Literal extends Symbol {
      * Complexity is O(n)
      *
      * Note:
-     * The followings are different literal: ~P, P.
-     * But the followings are the same: P, ((((P)))), ~~P, ~~(((~~P))).
+     * The following input will return literals: ~P, P.
+     * But the following inputs will return the same literal instance: P, ((((P)))), ~~P, ~~(((~~P))).
+     * The reason for this: assume Literal P is already created and set to true, when we create
+     * another Literal ~P, if we treat them as same literal, then we have to change the old P
+     * to be false and return the old Literal P, which is not desired.
+     * Does not allow negation is a better option but this implementation match the definition better.
+     * * Although they are treated as different literal, assigning true to P will assign true to P in ~P
+     * * as well, so no worry
      *
      * @param str the input literal string
      * @return Literal Object
-     * @throws InvalidSymbolException if null/empty/negation only/un-closed bracket/invalid character
+     * @throws InvalidSymbolException if null/empty/negation only/ un-closed/un-opened bracket /invalid character
      */
     public static Literal newInstance(String str) throws InvalidSymbolException {
         // check null
@@ -231,11 +237,15 @@ public class Literal extends Symbol {
             throw new IllegalStateException(
                     "Assign value to " + (this.isTautology() ? "tautology" : "contradiction") + " literal");
         }
-        this.rawLiteralTruthValue = value;
-
-        int same_literal_with_diff_negation_hash = hashcode ^ Objects.hashCode(!isNegated);
-        if (created_instances.containsKey(same_literal_with_diff_negation_hash)) {
-            created_instances.get(same_literal_with_diff_negation_hash).rawLiteralTruthValue = value;
+        // we need to set two literals to the same truth value because
+        // different negation when passed in is treated as different literal
+        int literal_true_hash = hashcode ^ Objects.hashCode(true);
+        if (created_instances.containsKey(literal_true_hash)) {
+            created_instances.get(literal_true_hash).rawLiteralTruthValue = value;
+        }
+        int literal_false_hash = hashcode ^ Objects.hashCode(false);
+        if (created_instances.containsKey(literal_false_hash)) {
+            created_instances.get(literal_false_hash).rawLiteralTruthValue = value;
         }
     }
 

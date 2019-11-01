@@ -1,6 +1,7 @@
 package core.trees;
 
 import core.exceptions.InvalidInsertionException;
+import core.exceptions.InvalidNodeException;
 import core.symbols.Connective;
 import core.symbols.Negation;
 
@@ -39,8 +40,21 @@ public class ConnNode extends BinaryNode {
         this.type = new_conn.getType();
     }
 
+    private void ensureLeftNotNull() {
+        if (left == null) throw new InvalidNodeException("Left Node for a connective node should not be null");
+    }
+
+    private void ensureCompleteNode() {
+        if (left == null || right == null) {
+            throw new InvalidNodeException("Connective node is incomplete");
+        } else if (type == null) {
+            throw new InvalidNodeException("Connective type is null");
+        }
+    }
+
     @Override
     public Node insert(LitNode node) {
+        ensureLeftNotNull();
         if (right == null) {
             right = node;
         } else {
@@ -51,6 +65,7 @@ public class ConnNode extends BinaryNode {
 
     @Override
     public Node insert(BracketNode node) {
+        ensureLeftNotNull();
         if (right == null) {
             right = node;
         } else {
@@ -61,21 +76,23 @@ public class ConnNode extends BinaryNode {
 
     @Override
     public Node insert(ConnNode node) {
-       if (node.precedence >= this.precedence) {
-           node.left = this;
-           return node;
-       } else {
-           if (right == null) {
-               throw new InvalidInsertionException("Inserting connective immediately after connective");
-           } else {
-               right = right.insert(node);
-               return this;
-           }
-       }
+        ensureLeftNotNull();
+        if (node.precedence >= this.precedence) {
+            node.left = this;
+            return node;
+        } else {
+            if (right == null) {
+                throw new InvalidInsertionException("Inserting connective immediately after connective");
+            } else {
+                right = right.insert(node);
+                return this;
+            }
+        }
     }
 
     @Override
     public Node insert(NegNode node) {
+        ensureLeftNotNull();
         if (right == null) right = node;
         else right.insert(node);
         return this;
@@ -83,6 +100,7 @@ public class ConnNode extends BinaryNode {
 
     @Override
     public boolean isTrue() {
+        ensureCompleteNode();
         switch (type) {
             case AND:
                 return left.isTrue() && right.isTrue();
@@ -99,6 +117,7 @@ public class ConnNode extends BinaryNode {
 
     @Override
     protected void eliminateArrows() {
+        ensureCompleteNode();
         if (type == Connective.Type.IMPLIES) {
             // a -> b == ~a \/ b
             // we cannot just do left.invertNegation();
@@ -153,6 +172,7 @@ public class ConnNode extends BinaryNode {
 
     @Override
     protected Node invertNegation() {
+        ensureCompleteNode();
         if (type == Connective.Type.IMPLIES || type == Connective.Type.IFF) {
             eliminateArrows();
         }
@@ -170,6 +190,7 @@ public class ConnNode extends BinaryNode {
 
     @Override
     protected Node copy() {
+        ensureCompleteNode();
         ConnNode new_node = new ConnNode(Connective.getInstance(type));
         new_node.left = left.copy();
         new_node.right = right.copy();
