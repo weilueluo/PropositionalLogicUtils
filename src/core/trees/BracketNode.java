@@ -5,7 +5,7 @@ import core.exceptions.InvalidInsertionException;
 import static core.symbols.Symbol.LBRACKET;
 import static core.symbols.Symbol.RBRACKET;
 
-public class BracketNode extends BinaryNode {
+public class BracketNode extends Node {
 
     Node head;
     private boolean closed;
@@ -63,7 +63,7 @@ public class BracketNode extends BinaryNode {
     }
 
     public void close() {
-        if (closed) throw new IllegalStateException("This Box node is already closed");
+        if (closed) throw new IllegalStateException("This bracket node is already closed");
         else closed = true;
     }
 
@@ -83,13 +83,9 @@ public class BracketNode extends BinaryNode {
 
     @Override
     public StringBuilder toBracketStringBuilder() {
-        StringBuilder left_sb = left == null ? new StringBuilder() : left.toBracketStringBuilder();
-        StringBuilder right_sb = right == null ? new StringBuilder() : right.toBracketStringBuilder();
         return new StringBuilder()
                 .append(LBRACKET)
-                .append(left_sb)
                 .append(head.toBracketString())
-                .append(right_sb)
                 .append(RBRACKET);
     }
 
@@ -106,7 +102,12 @@ public class BracketNode extends BinaryNode {
 
     @Override
     protected Node copy() {
-        return head.copy();
+        BracketNode new_node = new BracketNode();
+        new_node.head = head.copy();
+        if (closed) {
+            new_node.close();
+        }
+        return new_node;
     }
 
     @Override
