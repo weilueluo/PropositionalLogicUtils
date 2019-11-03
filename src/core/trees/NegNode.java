@@ -2,8 +2,11 @@ package core.trees;
 
 import core.exceptions.InvalidInsertionException;
 import core.exceptions.InvalidNodeException;
+import core.symbols.Literal;
 import core.symbols.Negation;
 import core.symbols.Symbol;
+
+import java.util.Set;
 
 import static core.symbols.Symbol.*;
 
@@ -11,6 +14,28 @@ public class NegNode extends SingletonNode {
 
     public NegNode(Symbol value) {
         super(value);
+    }
+
+    @Override
+    public Node toCNF() {
+        return null;
+    }
+
+    @Override
+    void addLiterals(Set<Literal> literals) {
+        descendant.addLiterals(literals);
+    }
+
+    @Override
+    Node removeRedundantBrackets() {
+        descendant = descendant.removeRedundantBrackets();
+        return this;
+    }
+
+    static NegNode negate(Node node) {
+        NegNode neg_node = new NegNode(Negation.getInstance());
+        neg_node.descendant = node;
+        return neg_node;
     }
 
     @Override
@@ -55,17 +80,23 @@ public class NegNode extends SingletonNode {
     }
 
     @Override
-    protected void eliminateArrows() {
+    void eliminateArrows() {
         descendant.eliminateArrows();
     }
 
     @Override
-    protected Node invertNegation() {
+    Node invertNegation() {
         return descendant;  // just remove this negation node
     }
 
     @Override
-    protected Node copy() {
+    Node pushNegations() {
+        descendant = descendant.invertNegation();
+        return descendant;
+    }
+
+    @Override
+    Node copy() {
         if (descendant == null) throw new InvalidNodeException("Copying a negation without descendant");
         NegNode new_node = new NegNode(Negation.getInstance());
         new_node.descendant = descendant.copy();
@@ -73,7 +104,7 @@ public class NegNode extends SingletonNode {
     }
 
     @Override
-    protected StringBuilder toStringBuilder() {
+    StringBuilder toStringBuilder() {
         return new StringBuilder().append(NEG).append(descendant.toStringBuilder());
     }
 

@@ -3,6 +3,9 @@ package core.trees;
 import core.exceptions.InvalidInsertionException;
 import core.exceptions.InvalidNodeException;
 import core.symbols.Literal;
+import core.symbols.Negation;
+
+import java.util.Set;
 
 public class LitNode extends BinaryNode {
 
@@ -36,28 +39,47 @@ public class LitNode extends BinaryNode {
     }
 
     @Override
+    public Node toCNF() {
+        return null;
+    }
+
+    @Override
+    void addLiterals(Set<Literal> literals) {
+        literals.add(literal);
+    }
+
+    @Override
+    Node removeRedundantBrackets() {
+        return this;
+    }
+
+    @Override
     public StringBuilder toBracketStringBuilder() {
         return new StringBuilder(value.getFull());
     }
 
     @Override
-    protected void eliminateArrows() {
+    void eliminateArrows() {
         // no arrow-like connective in literal
     }
 
     @Override
-    protected Node invertNegation() {
-        literal.invertNegation();
+    Node invertNegation() {
+        return NegNode.negate(this);
+    }
+
+    @Override
+    Node pushNegations() {
         return this;
     }
 
     @Override
-    protected Node copy() {
+    Node copy() {
         return this;  // literal with the same name always refer to the same literal
     }
 
     @Override
-    protected StringBuilder toStringBuilder() {
+    StringBuilder toStringBuilder() {
         return new StringBuilder(literal.getFull());
     }
 

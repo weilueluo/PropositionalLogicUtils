@@ -4,10 +4,8 @@ import core.exceptions.InvalidFormulaException;
 import core.symbols.Connective;
 import core.symbols.Literal;
 import core.symbols.Negation;
-import core.trees.BracketNode;
-import core.trees.ConnNode;
-import core.trees.LitNode;
-import core.trees.NegNode;
+import core.trees.*;
+import org.junit.jupiter.engine.execution.ExtensionValuesStore;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -76,6 +74,11 @@ public class Parser {
     public BracketNode getTree() {
         ensureEvaluated();
         return curr_node;
+    }
+
+    public void evaluate(Node tree) {
+        if (tree == null) throw new IllegalArgumentException("Given new tree is null");
+        evaluate(tree.toString());
     }
 
     void ensureEvaluated() {

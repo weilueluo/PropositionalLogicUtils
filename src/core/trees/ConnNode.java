@@ -3,13 +3,15 @@ package core.trees;
 import core.exceptions.InvalidInsertionException;
 import core.exceptions.InvalidNodeException;
 import core.symbols.Connective;
-import core.symbols.Negation;
+import core.symbols.Literal;
+
+import java.util.Set;
 
 
 public class ConnNode extends BinaryNode {
 
+    Connective.Type type;
     private int precedence;
-    private Connective.Type type;
 
     public ConnNode(Connective conn) {
         super(conn);
@@ -17,7 +19,14 @@ public class ConnNode extends BinaryNode {
         this.type = conn.getType();
     }
 
-    private void change_type_to(Connective.Type type) {
+    static ConnNode connect(Connective.Type conn_type, Node left, Node right) {
+        ConnNode conn_node = new ConnNode(Connective.getInstance(conn_type));
+        conn_node.left = left;
+        conn_node.right = right;
+        return conn_node;
+    }
+
+    private void changeTypeTo(Connective.Type type) {
         Connective new_conn;
         switch (type) {
             case AND:
@@ -44,7 +53,7 @@ public class ConnNode extends BinaryNode {
         if (left == null) throw new InvalidNodeException("Left Node for a connective node should not be null");
     }
 
-    private void ensureCompleteNode() {
+    void ensureFullNode() {
         if (left == null || right == null) {
             throw new InvalidNodeException("Connective node is incomplete");
         } else if (type == null) {
@@ -100,7 +109,7 @@ public class ConnNode extends BinaryNode {
 
     @Override
     public boolean isTrue() {
-        ensureCompleteNode();
+        ensureFullNode();
         switch (type) {
             case AND:
                 return left.isTrue() && right.isTrue();
@@ -115,9 +124,39 @@ public class ConnNode extends BinaryNode {
         }
     }
 
+    public Node toCNF() {
+        ensureFullNode();
+        eliminateArrows();  // remove -> and <->
+        left = left.toCNF();
+        right = right.toCNF();
+        removeRedundantBrackets();
+
+//        if (type == Connective.Type.AND) {
+//            return CNFConnectiveHandler.handleAnd(this);
+//        } else if (type == Connective.Type.OR) {
+//            return CNFConnectiveHandler.handleOr(this);
+//        } else {
+//            throw new IllegalStateException("Unrecognised Connective type");
+//        }
+        return null;
+    }
+
     @Override
-    protected void eliminateArrows() {
-        ensureCompleteNode();
+    void addLiterals(Set<Literal> literals) {
+        left.addLiterals(literals);
+        right.addLiterals(literals);
+    }
+
+    @Override
+    Node removeRedundantBrackets() {
+        left = left.removeRedundantBrackets();
+        right = right.removeRedundantBrackets();
+        return this;
+    }
+
+    @Override
+    void eliminateArrows() {
+        ensureFullNode();
         if (type == Connective.Type.IMPLIES) {
             // a -> b == ~a \/ b
             // we cannot just do left.invertNegation();
@@ -125,61 +164,44 @@ public class ConnNode extends BinaryNode {
             // e.g. a <-> b will become ((~a \/ ~b) /\ (~b \/ ~a)) instead of ((~a \/ b) /\ (~b \/ a))
 
             // change a to ~(a)
-            NegNode neg_node = new NegNode(Negation.getInstance());
-            BracketNode left_bracket_node = new BracketNode();
-            left_bracket_node.head = left;
-            left_bracket_node.close();
-            neg_node.insert(left_bracket_node);
-            left = neg_node;
+            left = NegNode.negate(BracketNode.bracket(left));
 
             // change b to (b)
-            BracketNode right_bracket_node = new BracketNode();
-            right_bracket_node.head = right;
-            right_bracket_node.close();
-            right = right_bracket_node;
+            right = BracketNode.bracket(right);
 
             // change /\ to \/
-            change_type_to(Connective.Type.OR);
+            changeTypeTo(Connective.Type.OR);
         } else if (type == Connective.Type.IFF) {
             // a <-> b == a -> b /\ b -> a
 
             // create (a -> b)
-            BracketNode new_left = new BracketNode();
-            ConnNode new_left_head = new ConnNode(Connective.getImpliesInstance());
-            new_left_head.left = left;
-            new_left_head.right = right;
-            new_left.close();
-            new_left.head = new_left_head;
+            BracketNode new_left = BracketNode.bracket(ConnNode.connect(Connective.Type.IMPLIES, left, right));
 
             // create (b -> a)
-            BracketNode new_right = new BracketNode();
-            ConnNode new_right_head = new ConnNode(Connective.getImpliesInstance());
-            new_right_head.left = right.copy();
-            new_right_head.right = left.copy();
-            new_right.close();
-            new_right.head = new_right_head;
+            BracketNode new_right = BracketNode.bracket(
+                    ConnNode.connect(Connective.Type.IMPLIES, right.copy(), left.copy()));
 
             // change assignment
             left = new_left;
             right = new_right;
 
             // change <-> to /\
-            change_type_to(Connective.Type.AND);
+            changeTypeTo(Connective.Type.AND);
         }
         left.eliminateArrows();
         right.eliminateArrows();
     }
 
     @Override
-    protected Node invertNegation() {
-        ensureCompleteNode();
+    Node invertNegation() {
+        ensureFullNode();
         if (type == Connective.Type.IMPLIES || type == Connective.Type.IFF) {
             eliminateArrows();
         }
         if (type == Connective.Type.AND) {
-            change_type_to(Connective.Type.OR);
+            changeTypeTo(Connective.Type.OR);
         } else if (type == Connective.Type.OR) {
-            change_type_to(Connective.Type.AND);
+            changeTypeTo(Connective.Type.AND);
         } else {
             throw new IllegalStateException("Unrecognised connective type even after eliminating arrow");
         }
@@ -189,8 +211,15 @@ public class ConnNode extends BinaryNode {
     }
 
     @Override
-    protected Node copy() {
-        ensureCompleteNode();
+    Node pushNegations() {
+        left = left.pushNegations();
+        right = right.pushNegations();
+        return this;
+    }
+
+    @Override
+    Node copy() {
+        ensureFullNode();
         ConnNode new_node = new ConnNode(Connective.getInstance(type));
         new_node.left = left.copy();
         new_node.right = right.copy();
@@ -198,7 +227,7 @@ public class ConnNode extends BinaryNode {
     }
 
     @Override
-    protected StringBuilder toStringBuilder() {
+    StringBuilder toStringBuilder() {
         return new StringBuilder()
                 .append(left.toStringBuilder())
                 .append(' ')

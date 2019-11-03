@@ -1,6 +1,9 @@
 package core.trees;
 
 import core.exceptions.InvalidInsertionException;
+import core.symbols.Literal;
+
+import java.util.Set;
 
 import static core.symbols.Symbol.LBRACKET;
 import static core.symbols.Symbol.RBRACKET;
@@ -15,6 +18,51 @@ public class BracketNode extends Node {
         head = null;
         closed = false;
         this.value = null;
+    }
+
+    @Override
+    public Node toCNF() {
+        return null;
+    }
+
+    @Override
+    void addLiterals(Set<Literal> literals) {
+        head.addLiterals(literals);
+    }
+
+    @Override
+    Node removeRedundantBrackets() {
+        head = head.removeRedundantBrackets();
+
+        // remove all inner duplicate brackets
+        while (head instanceof BracketNode) {
+            head = ((BracketNode) head).head;
+        }
+
+        // if inner node contains negation and literal only then remove this bracket
+        // (~~~a) == ~~~a, (~a) == ~a etc...
+        Node look_ahead = head;
+        boolean remove_this = false;
+        while (true) {
+            if (look_ahead instanceof LitNode) {
+                remove_this = true;
+                break;
+            } else if (look_ahead instanceof NegNode) {
+                look_ahead = ((NegNode) look_ahead).descendant;
+            } else {
+                break;
+            }
+        }
+
+        if (remove_this) return head;
+        else return this;
+    }
+
+    static BracketNode bracket(Node node) {
+        BracketNode bracket_node = new BracketNode();
+        bracket_node.head = node;
+        bracket_node.close();
+        return bracket_node;
     }
 
     @Override
@@ -97,20 +145,26 @@ public class BracketNode extends Node {
     }
 
     @Override
-    protected void eliminateArrows() {
+    void eliminateArrows() {
         ensureComplete();
         head.eliminateArrows();
     }
 
     @Override
-    protected Node invertNegation() {
+    Node invertNegation() {
         ensureComplete();
         head = head.invertNegation();
         return this;
     }
 
     @Override
-    protected Node copy() {
+    Node pushNegations() {
+        head = head.pushNegations();
+        return this;
+    }
+
+    @Override
+    Node copy() {
         ensureComplete();
         BracketNode new_node = new BracketNode();
         new_node.head = head.copy();
@@ -119,7 +173,7 @@ public class BracketNode extends Node {
     }
 
     @Override
-    protected StringBuilder toStringBuilder() {
+    StringBuilder toStringBuilder() {
         StringBuilder head_sb = head == null ? new StringBuilder() : head.toStringBuilder();
         return new StringBuilder()
                 .append(LBRACKET)

@@ -1,12 +1,13 @@
 package core.trees;
 
 import core.TruthTable;
-import core.exceptions.InvalidNodeException;
-import core.exceptions.InvalidSymbolException;
+import core.symbols.Literal;
 import core.symbols.Symbol;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
 
 
 public abstract class Node implements NodeInsertion, TruthValue {
@@ -32,17 +33,31 @@ public abstract class Node implements NodeInsertion, TruthValue {
         return toBracketStringBuilder().toString();
     }
 
-    public abstract StringBuilder toTreeStringBuilder(int depth);
+    public abstract Node toCNF();
 
-    public abstract StringBuilder toBracketStringBuilder();
+    public Literal[] getLiterals() {
+        Set<Literal> literals = new HashSet<>();
+        addLiterals(literals);
+        return literals.toArray(Literal[]::new);
+    }
 
-    protected abstract void eliminateArrows();
+    abstract void addLiterals(Set<Literal> literals);
 
-    protected abstract Node invertNegation();
+    abstract Node removeRedundantBrackets();
 
-    protected abstract Node copy();  // this return a deep copy
+    abstract StringBuilder toTreeStringBuilder(int depth);
 
-    protected abstract StringBuilder toStringBuilder();
+    abstract StringBuilder toBracketStringBuilder();
+
+    abstract void eliminateArrows();
+
+    abstract Node invertNegation();
+
+    abstract Node pushNegations();
+
+    abstract Node copy();  // this return a deep copy
+
+    abstract StringBuilder toStringBuilder();
 
     public String toString() {
         return toStringBuilder().toString();
@@ -56,14 +71,24 @@ public abstract class Node implements NodeInsertion, TruthValue {
         System.out.println(parser.getTree());
         System.out.println(parser.generate());
 
-        Instant start = Instant.now();
         parser.getTree().eliminateArrows();
-        Instant end = Instant.now();
+        parser.evaluate(parser.getTree());
 
         System.out.println("After eliminate arrow");
         System.out.println(parser.getTree());
         parser.evaluate(parser.getTree().toString());
         System.out.println(parser.generate());
-        System.out.println("Arrow Elimination Runtime: " + Duration.between(start, end).toMillis() + "ms");
+
+        Instant start = Instant.now();
+        parser.evaluate(parser.getTree().pushNegations());
+        Instant end = Instant.now();
+
+        System.out.println("After push negation");
+        System.out.println(parser.getTree());
+        System.out.println("After remove redundant brackets");
+        parser.evaluate(parser.getTree().removeRedundantBrackets());
+        System.out.println(parser.getTree());
+        System.out.println(parser.generate());
+        System.out.println("Push Negations Runtime: " + Duration.between(start, end).toMillis() + "ms");
     }
 }
