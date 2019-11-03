@@ -126,10 +126,10 @@ public class ConnNode extends BinaryNode {
 
     public Node toCNF() {
         ensureFullNode();
-        eliminateArrows();  // remove -> and <->
+        _eliminateArrows();  // remove -> and <->
         left = left.toCNF();
         right = right.toCNF();
-        removeRedundantBrackets();
+        _removeRedundantBrackets();
 
 //        if (type == Connective.Type.AND) {
 //            return CNFConnectiveHandler.handleAnd(this);
@@ -148,14 +148,14 @@ public class ConnNode extends BinaryNode {
     }
 
     @Override
-    Node removeRedundantBrackets() {
-        left = left.removeRedundantBrackets();
-        right = right.removeRedundantBrackets();
+    Node _removeRedundantBrackets() {
+        left = left._removeRedundantBrackets();
+        right = right._removeRedundantBrackets();
         return this;
     }
 
     @Override
-    void eliminateArrows() {
+    public void _eliminateArrows() {
         ensureFullNode();
         if (type == Connective.Type.IMPLIES) {
             // a -> b == ~a \/ b
@@ -188,15 +188,15 @@ public class ConnNode extends BinaryNode {
             // change <-> to /\
             changeTypeTo(Connective.Type.AND);
         }
-        left.eliminateArrows();
-        right.eliminateArrows();
+        left._eliminateArrows();
+        right._eliminateArrows();
     }
 
     @Override
-    Node invertNegation() {
+    Node _invertNegation() {
         ensureFullNode();
         if (type == Connective.Type.IMPLIES || type == Connective.Type.IFF) {
-            eliminateArrows();
+            _eliminateArrows();
         }
         if (type == Connective.Type.AND) {
             changeTypeTo(Connective.Type.OR);
@@ -205,25 +205,22 @@ public class ConnNode extends BinaryNode {
         } else {
             throw new IllegalStateException("Unrecognised connective type even after eliminating arrow");
         }
-        left = left.invertNegation();
-        right = right.invertNegation();
+        left = left._invertNegation();
+        right = right._invertNegation();
         return this;
     }
 
     @Override
-    Node pushNegations() {
-        left = left.pushNegations();
-        right = right.pushNegations();
+    Node _pushNegations() {
+        left = left._pushNegations();
+        right = right._pushNegations();
         return this;
     }
 
     @Override
     Node copy() {
         ensureFullNode();
-        ConnNode new_node = new ConnNode(Connective.getInstance(type));
-        new_node.left = left.copy();
-        new_node.right = right.copy();
-        return new_node;
+        return ConnNode.connect(type, left.copy(), right.copy());
     }
 
     @Override

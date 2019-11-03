@@ -20,6 +20,13 @@ public abstract class Symbol {
     public final static char BACKWARD_SLASH = '\\';
     public final static char FORWARD_SLASH = '/';
 
+    public final static int BRACKET_PRECEDENCE = 0;
+    public final static int NEGATION_PRECEDENCE = 1;
+    public final static int AND_PRECEDENCE = 2;
+    public final static int OR_PRECEDENCE = 3;
+    public final static int IMPLIES_PRECEDENCE = 4;
+    public final static int IFF_PRECEDENCE = 5;
+
     public Symbol() {
     } // empty
 

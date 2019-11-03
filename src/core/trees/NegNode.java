@@ -27,8 +27,8 @@ public class NegNode extends SingletonNode {
     }
 
     @Override
-    Node removeRedundantBrackets() {
-        descendant = descendant.removeRedundantBrackets();
+    Node _removeRedundantBrackets() {
+        descendant = descendant._removeRedundantBrackets();
         return this;
     }
 
@@ -80,27 +80,25 @@ public class NegNode extends SingletonNode {
     }
 
     @Override
-    void eliminateArrows() {
-        descendant.eliminateArrows();
+    public void _eliminateArrows() {
+        descendant._eliminateArrows();
     }
 
     @Override
-    Node invertNegation() {
+    Node _invertNegation() {
         return descendant;  // just remove this negation node
     }
 
     @Override
-    Node pushNegations() {
-        descendant = descendant.invertNegation();
+    Node _pushNegations() {
+        descendant = descendant._invertNegation();
         return descendant;
     }
 
     @Override
     Node copy() {
         if (descendant == null) throw new InvalidNodeException("Copying a negation without descendant");
-        NegNode new_node = new NegNode(Negation.getInstance());
-        new_node.descendant = descendant.copy();
-        return new_node;
+        return NegNode.negate(descendant.copy());
     }
 
     @Override

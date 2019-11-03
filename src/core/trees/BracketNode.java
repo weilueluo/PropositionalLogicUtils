@@ -31,16 +31,18 @@ public class BracketNode extends Node {
     }
 
     @Override
-    Node removeRedundantBrackets() {
-        head = head.removeRedundantBrackets();
+    Node _removeRedundantBrackets() {
+        head = head._removeRedundantBrackets();
+        System.out.println("in remove redundant");
 
-        // remove all inner duplicate brackets
+        // remove duplicate bracket
         while (head instanceof BracketNode) {
+            System.out.println("in remove duplicate");
             head = ((BracketNode) head).head;
         }
 
-        // if inner node contains negation and literal only then remove this bracket
-        // (~~~a) == ~~~a, (~a) == ~a etc...
+        // if inner node contains bracket, negation and literal only then remove this bracket
+        // (~~(~a)) == ~~~a, (~a) == ~a etc...
         Node look_ahead = head;
         boolean remove_this = false;
         while (true) {
@@ -49,6 +51,8 @@ public class BracketNode extends Node {
                 break;
             } else if (look_ahead instanceof NegNode) {
                 look_ahead = ((NegNode) look_ahead).descendant;
+            } else if (look_ahead instanceof BracketNode) {
+                look_ahead = ((BracketNode) look_ahead).head;
             } else {
                 break;
             }
@@ -145,35 +149,33 @@ public class BracketNode extends Node {
     }
 
     @Override
-    void eliminateArrows() {
+    public void _eliminateArrows() {
         ensureComplete();
-        head.eliminateArrows();
+        head._eliminateArrows();
     }
 
     @Override
-    Node invertNegation() {
+    Node _invertNegation() {
         ensureComplete();
-        head = head.invertNegation();
+        head = head._invertNegation();
         return this;
     }
 
     @Override
-    Node pushNegations() {
-        head = head.pushNegations();
+    Node _pushNegations() {
+        head = head._pushNegations();
         return this;
     }
 
     @Override
     Node copy() {
         ensureComplete();
-        BracketNode new_node = new BracketNode();
-        new_node.head = head.copy();
-        new_node.close();
-        return new_node;
+        return BracketNode.bracket(head.copy());
     }
 
     @Override
     StringBuilder toStringBuilder() {
+        System.out.println("in bracket string builder");
         StringBuilder head_sb = head == null ? new StringBuilder() : head.toStringBuilder();
         return new StringBuilder()
                 .append(LBRACKET)

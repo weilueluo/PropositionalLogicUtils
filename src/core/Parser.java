@@ -5,7 +5,6 @@ import core.symbols.Connective;
 import core.symbols.Literal;
 import core.symbols.Negation;
 import core.trees.*;
-import org.junit.jupiter.engine.execution.ExtensionValuesStore;
 
 import java.time.Duration;
 import java.time.Instant;

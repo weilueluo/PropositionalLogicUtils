@@ -49,7 +49,7 @@ public class LitNode extends BinaryNode {
     }
 
     @Override
-    Node removeRedundantBrackets() {
+    Node _removeRedundantBrackets() {
         return this;
     }
 
@@ -59,17 +59,17 @@ public class LitNode extends BinaryNode {
     }
 
     @Override
-    void eliminateArrows() {
+    public void _eliminateArrows() {
         // no arrow-like connective in literal
     }
 
     @Override
-    Node invertNegation() {
+    Node _invertNegation() {
         return NegNode.negate(this);
     }
 
     @Override
-    Node pushNegations() {
+    Node _pushNegations() {
         return this;
     }
 

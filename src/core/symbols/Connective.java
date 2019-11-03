@@ -8,14 +8,10 @@ import static core.common.Utilities.stripAllSpaces;
 
 public class Connective extends Symbol {
 
-    public enum Type { IFF, AND, OR, IMPLIES }
-
     private final static Connective SINGLETON_IMPLIES;
     private final static Connective SINGLETON_IFF;
     private final static Connective SINGLETON_AND;
     private final static Connective SINGLETON_OR;
-    private final int precedence;
-    private final Type type;
 
     static {
         SINGLETON_IFF = new Connective(IFF);
@@ -24,7 +20,9 @@ public class Connective extends Symbol {
         SINGLETON_AND = new Connective(AND);
     }
 
-    private String connective;
+    private final int PRECEDENCE;
+    private final Type TYPE;
+    private final String CONNECTIVE;
 
     private Connective(String str) throws InvalidSymbolException {
 
@@ -42,24 +40,24 @@ public class Connective extends Symbol {
 
         switch (str) {
             case OR:
-                this.type = Type.OR;
-                this.connective = OR;
-                this.precedence = 2;
+                this.TYPE = Type.OR;
+                this.CONNECTIVE = OR;
+                this.PRECEDENCE = OR_PRECEDENCE;
                 break;
             case AND:
-                this.type = Type.AND;
-                this.connective = AND;
-                this.precedence = 3;
+                this.TYPE = Type.AND;
+                this.CONNECTIVE = AND;
+                this.PRECEDENCE = AND_PRECEDENCE;
                 break;
             case IMPLIES:
-                this.type = Type.IMPLIES;
-                this.connective = IMPLIES;
-                this.precedence = 4;
+                this.TYPE = Type.IMPLIES;
+                this.CONNECTIVE = IMPLIES;
+                this.PRECEDENCE = IMPLIES_PRECEDENCE;
                 break;
             case IFF:
-                this.type = Type.IFF;
-                this.connective = IFF;
-                this.precedence = 5;
+                this.TYPE = Type.IFF;
+                this.CONNECTIVE = IFF;
+                this.PRECEDENCE = IFF_PRECEDENCE;
                 break;
             default:
                 throw new InvalidSymbolException(String.format("Connective \"%s\" is not recognised, use %s | %s | %s" +
@@ -116,18 +114,18 @@ public class Connective extends Symbol {
         if (IMPLIES.equals(str)) return SINGLETON_IMPLIES;
         if (IFF.equals(str)) return SINGLETON_IFF;
 
-        throw new InvalidSymbolException(String.format("Connective \"%s\" is not recognised %n use %s | %s | %s | %s"
-                , str, OR, AND, IMPLIES, IFF));
+        throw new InvalidSymbolException(String.format("Connective \"%s\" is not recognised %n use %s | %s | %s | %s " +
+                        "instead", str, OR, AND, IMPLIES, IFF));
 
     }
 
     public int getPrecedence() {
-        return precedence;
+        return PRECEDENCE;
     }
 
     @Override
     public String toString() {
-        return this.connective;
+        return this.CONNECTIVE;
     }
 
     @Override
@@ -137,7 +135,7 @@ public class Connective extends Symbol {
 
     @Override
     public String getRaw() {
-        return connective;
+        return CONNECTIVE;
     }
 
     @Override
@@ -146,6 +144,8 @@ public class Connective extends Symbol {
     }
 
     public Type getType() {
-        return type;
+        return TYPE;
     }
+
+    public enum Type {IFF, AND, OR, IMPLIES}
 }
