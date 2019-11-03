@@ -33,11 +33,9 @@ public class BracketNode extends Node {
     @Override
     Node _removeRedundantBrackets() {
         head = head._removeRedundantBrackets();
-        System.out.println("in remove redundant");
 
         // remove duplicate bracket
         while (head instanceof BracketNode) {
-            System.out.println("in remove duplicate");
             head = ((BracketNode) head).head;
         }
 

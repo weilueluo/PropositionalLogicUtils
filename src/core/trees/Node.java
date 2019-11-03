@@ -144,10 +144,8 @@ public abstract class Node implements NodeInsertion, TruthValue {
         System.out.println("After");
         System.out.println(parser.getTree());
         System.out.println(parser.generate());
-        System.out.println(parser.getTree().toTreeString());
 
         System.out.println("Runtime: " + Duration.between(start, end).toMillis() + "ms");
-
 
 //        System.out.println("Before eliminate arrow");
 //        System.out.println(parser.getTree());
