@@ -173,7 +173,6 @@ public class BracketNode extends Node {
 
     @Override
     StringBuilder toStringBuilder() {
-        System.out.println("in bracket string builder");
         StringBuilder head_sb = head == null ? new StringBuilder() : head.toStringBuilder();
         return new StringBuilder()
                 .append(LBRACKET)
