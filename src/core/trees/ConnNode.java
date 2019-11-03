@@ -4,6 +4,7 @@ import core.exceptions.InvalidInsertionException;
 import core.exceptions.InvalidNodeException;
 import core.symbols.Connective;
 import core.symbols.Literal;
+import core.symbols.Symbol;
 
 import java.util.Set;
 
@@ -53,7 +54,7 @@ public class ConnNode extends BinaryNode {
         if (left == null) throw new InvalidNodeException("Left Node for a connective node should not be null");
     }
 
-    void ensureFullNode() {
+    private void ensureFullNode() {
         if (left == null || right == null) {
             throw new InvalidNodeException("Connective node is incomplete");
         } else if (type == null) {
@@ -86,7 +87,7 @@ public class ConnNode extends BinaryNode {
     @Override
     public Node insert(ConnNode node) {
         ensureLeftNotNull();
-        if (node.precedence >= this.precedence) {
+        if (node.getPrecedence() >= this.getPrecedence()) {
             node.left = this;
             return node;
         } else {
@@ -129,7 +130,7 @@ public class ConnNode extends BinaryNode {
         _eliminateArrows();  // remove -> and <->
         left = left.toCNF();
         right = right.toCNF();
-        _removeRedundantBrackets();
+        _removeRedundantBrackets(Symbol.HIGHEST_PRECEDENCE);
 
 //        if (type == Connective.Type.AND) {
 //            return CNFConnectiveHandler.handleAnd(this);
@@ -148,9 +149,14 @@ public class ConnNode extends BinaryNode {
     }
 
     @Override
-    Node _removeRedundantBrackets() {
-        left = left._removeRedundantBrackets();
-        right = right._removeRedundantBrackets();
+    int getPrecedence() {
+        return precedence;
+    }
+
+    @Override
+    Node _removeRedundantBrackets(int parent_precedence) {
+        left = left._removeRedundantBrackets(getPrecedence());
+        right = right._removeRedundantBrackets(getPrecedence());
         return this;
     }
 

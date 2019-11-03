@@ -8,8 +8,6 @@ import core.symbols.Symbol;
 
 import java.util.Set;
 
-import static core.symbols.Symbol.*;
-
 public class NegNode extends SingletonNode {
 
     public NegNode(Symbol value) {
@@ -27,8 +25,13 @@ public class NegNode extends SingletonNode {
     }
 
     @Override
-    Node _removeRedundantBrackets() {
-        descendant = descendant._removeRedundantBrackets();
+    int getPrecedence() {
+        return Symbol.NEGATION_PRECEDENCE;
+    }
+
+    @Override
+    Node _removeRedundantBrackets(int parent_precedence) {
+        descendant = descendant._removeRedundantBrackets(getPrecedence());
         return this;
     }
 
@@ -73,9 +76,9 @@ public class NegNode extends SingletonNode {
                     .append(descendant.toBracketStringBuilder());
         } else {
             return new StringBuilder(value.getFull())
-                .append(LBRACKET)
+                .append(Symbol.LBRACKET)
                 .append(descendant.toBracketStringBuilder())
-                .append(RBRACKET);
+                .append(Symbol.RBRACKET);
         }
     }
 
@@ -103,7 +106,7 @@ public class NegNode extends SingletonNode {
 
     @Override
     StringBuilder toStringBuilder() {
-        return new StringBuilder().append(NEG).append(descendant.toStringBuilder());
+        return new StringBuilder().append(Symbol.NEG).append(descendant.toStringBuilder());
     }
 
     @Override

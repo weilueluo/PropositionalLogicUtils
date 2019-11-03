@@ -2,6 +2,7 @@ package core.trees;
 
 import core.exceptions.InvalidInsertionException;
 import core.symbols.Literal;
+import core.symbols.Symbol;
 
 import java.util.Set;
 
@@ -31,33 +32,37 @@ public class BracketNode extends Node {
     }
 
     @Override
-    Node _removeRedundantBrackets() {
-        head = head._removeRedundantBrackets();
+    int getPrecedence() {
+        return Symbol.BRACKET_PRECEDENCE;
+    }
+
+    @Override
+    Node _removeRedundantBrackets(int parent_precedence) {
+        head = head._removeRedundantBrackets(getPrecedence());
+        if (head.getPrecedence() <= parent_precedence) return head;
+        else return this;
 
         // remove duplicate bracket
-        while (head instanceof BracketNode) {
-            head = ((BracketNode) head).head;
-        }
+//        while (head instanceof BracketNode) {
+//            head = ((BracketNode) head).head;
+//        }
 
-        // if inner node contains bracket, negation and literal only then remove this bracket
-        // (~~(~a)) == ~~~a, (~a) == ~a etc...
-        Node look_ahead = head;
-        boolean remove_this = false;
-        while (true) {
-            if (look_ahead instanceof LitNode) {
-                remove_this = true;
-                break;
-            } else if (look_ahead instanceof NegNode) {
-                look_ahead = ((NegNode) look_ahead).descendant;
-            } else if (look_ahead instanceof BracketNode) {
-                look_ahead = ((BracketNode) look_ahead).head;
-            } else {
-                break;
-            }
-        }
-
-        if (remove_this) return head;
-        else return this;
+//        // if inner node contains bracket, negation and literal only then remove this bracket
+//        // (~~(~a)) == ~~~a, (~a) == ~a etc...
+//        Node look_ahead = head;
+//        boolean remove_this = false;
+//        while (true) {
+//            if (look_ahead instanceof LitNode) {
+//                remove_this = true;
+//                break;
+//            } else if (look_ahead instanceof NegNode) {
+//                look_ahead = ((NegNode) look_ahead).descendant;
+//            } else if (look_ahead instanceof BracketNode) {
+//                look_ahead = ((BracketNode) look_ahead).head;
+//            } else {
+//                break;
+//            }
+//        }
     }
 
     static BracketNode bracket(Node node) {

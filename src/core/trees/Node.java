@@ -57,17 +57,18 @@ public abstract class Node implements NodeInsertion, TruthValue {
     abstract void addLiterals(Set<Literal> literals);
 
     /**
-     * // TODO
-     * @return a node after removing duplicate bracket and bracket for literal, not removing precedence bracket yet.
+     * @return a node after removing redundant brackets.
      */
     public Node removeRedundantBrackets() {
         Node copy = this.copy();
-        copy = copy._removeRedundantBrackets();
+        copy = copy._removeRedundantBrackets(Symbol.HIGHEST_PRECEDENCE);
         return copy;
     }
 
+    abstract int getPrecedence();
+
     // internal method which may alter the existing tree
-    abstract Node _removeRedundantBrackets();
+    abstract Node _removeRedundantBrackets(int parent_precedent);
 
     // internal method which return a string builder instead of string for efficiency
     abstract StringBuilder toTreeStringBuilder(int depth);
@@ -129,15 +130,15 @@ public abstract class Node implements NodeInsertion, TruthValue {
     public static void main(String[] args) {
         var parser = new TruthTable();
 //        parser.evaluate("(a /\\ (~b -> a) <-> c \\/ b -> ~a /\\ (c <-> a)) \\/ ~b");
-        parser.evaluate("a /\\ b /\\ c");
+        parser.evaluate("a /\\ ((((b \\/ (~~(~~(c -> d)))))))");
         System.out.println("Before");
         System.out.println(parser.getTree());
         System.out.println(parser.generate());
 
         var start = Instant.now();
         parser.evaluate(parser.getTree()
-                .eliminateArrows()
-                .pushNegations()
+//                .eliminateArrows()
+//                .pushNegations()
                 .removeRedundantBrackets());
         var end = Instant.now();
 

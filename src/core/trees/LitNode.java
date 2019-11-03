@@ -3,7 +3,7 @@ package core.trees;
 import core.exceptions.InvalidInsertionException;
 import core.exceptions.InvalidNodeException;
 import core.symbols.Literal;
-import core.symbols.Negation;
+import core.symbols.Symbol;
 
 import java.util.Set;
 
@@ -49,7 +49,12 @@ public class LitNode extends BinaryNode {
     }
 
     @Override
-    Node _removeRedundantBrackets() {
+    int getPrecedence() {
+        return Symbol.LITERAL_PRECEDENCE;
+    }
+
+    @Override
+    Node _removeRedundantBrackets(int parent_precedent) {
         return this;
     }
 
