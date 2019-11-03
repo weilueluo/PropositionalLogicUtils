@@ -1,2 +1,2 @@
 # Satis
-A Propositional Logic Playground
+Propositional Logic Utilities
