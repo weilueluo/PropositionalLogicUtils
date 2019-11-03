@@ -72,6 +72,10 @@ public class BracketNode extends Node {
         return bracket_node;
     }
 
+    public Node getHead() {
+        return head;
+    }
+
     @Override
     public Node insert(LitNode node) {
         if (isClosed()) {

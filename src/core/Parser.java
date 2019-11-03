@@ -35,6 +35,7 @@ public class Parser {
 
     private int index;  // current index
     private Stack<BracketNode> bracket_nodes_stack;  // for checking valid brackets
+    private Node evaluated_node;
     private BracketNode curr_node;
     private boolean incomplete_clause;  // a flag to check if parsing stopped half way of a complete clause
     private String unprocessed_str;  // user input string
@@ -68,11 +69,12 @@ public class Parser {
         chars = unprocessed_str == null ? null : unprocessed_str.toCharArray();
         literalPool = new HashSet<>();
         literals = null;
+        evaluated_node = null;
     }
 
-    public BracketNode getTree() {
+    public Node getTree() {
         ensureEvaluated();
-        return curr_node;
+        return evaluated_node;
     }
 
     public void evaluate(Node tree) {
@@ -81,7 +83,7 @@ public class Parser {
     }
 
     void ensureEvaluated() {
-        if (curr_node == null) {
+        if (evaluated_node == null) {
             throw new IllegalStateException("There is no tree/literal before evaluate is called");
         }
     }
@@ -143,7 +145,7 @@ public class Parser {
         if (!bracket_nodes_stack.empty()) {
             handle_error("Unclosed opening bracket");
         }
-        curr_node.close();
+        evaluated_node = curr_node.getHead();  // remove outer bracket
         literals = literalPool.toArray(new Literal[0]);
     }
 
