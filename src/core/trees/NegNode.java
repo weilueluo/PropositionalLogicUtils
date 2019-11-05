@@ -6,33 +6,13 @@ import core.symbols.Literal;
 import core.symbols.Negation;
 import core.symbols.Symbol;
 
+import java.util.List;
 import java.util.Set;
 
 public class NegNode extends SingletonNode {
 
     public NegNode(Symbol value) {
         super(value);
-    }
-
-    @Override
-    public Node toCNF() {
-        return null;
-    }
-
-    @Override
-    void addLiterals(Set<Literal> literals) {
-        descendant.addLiterals(literals);
-    }
-
-    @Override
-    int getPrecedence() {
-        return Symbol.NEGATION_PRECEDENCE;
-    }
-
-    @Override
-    Node _removeRedundantBrackets(int parent_precedence) {
-        descendant = descendant._removeRedundantBrackets(getPrecedence());
-        return this;
     }
 
     static NegNode negate(Node node) {
@@ -70,16 +50,22 @@ public class NegNode extends SingletonNode {
     }
 
     @Override
-    public StringBuilder toBracketStringBuilder() {
-        if (descendant instanceof LitNode) {  // avoid too many brackets, so no bracket for literal
-            return new StringBuilder(value.getFull())
-                    .append(descendant.toBracketStringBuilder());
-        } else {
-            return new StringBuilder(value.getFull())
-                .append(Symbol.LBRACKET)
-                .append(descendant.toBracketStringBuilder())
-                .append(Symbol.RBRACKET);
-        }
+    Node copy() {
+        if (descendant == null) throw new InvalidNodeException("Copying a negation without descendant");
+        return NegNode.negate(descendant.copy());
+    }
+
+    @Override
+    Node _removeRedundantBrackets(int parent_precedence) {
+        descendant = descendant._removeRedundantBrackets(getPrecedence());
+        return this;
+    }
+
+    @Override
+    Node _pushNegations() {
+        descendant = descendant._pushNegations();
+        descendant = descendant._invertNegation();
+        return descendant;
     }
 
     @Override
@@ -88,20 +74,37 @@ public class NegNode extends SingletonNode {
     }
 
     @Override
+    public StringBuilder toBracketStringBuilder() {
+        if (descendant instanceof LitNode) {  // avoid too many brackets, so no bracket for literal
+            return new StringBuilder(value.getFull())
+                    .append(descendant.toBracketStringBuilder());
+        } else {
+            return new StringBuilder(value.getFull())
+                    .append(Symbol.LBRACKET)
+                    .append(descendant.toBracketStringBuilder())
+                    .append(Symbol.RBRACKET);
+        }
+    }
+
+    @Override
+    Node _toCNF(List<Node> clauses) {
+        clauses.add(this);
+        return this;
+    }
+
+    @Override
+    void addLiterals(Set<Literal> literals) {
+        descendant.addLiterals(literals);
+    }
+
+    @Override
+    int getPrecedence() {
+        return Symbol.NEGATION_PRECEDENCE;
+    }
+
+    @Override
     Node _invertNegation() {
         return descendant;  // just remove this negation node
-    }
-
-    @Override
-    Node _pushNegations() {
-        descendant = descendant._invertNegation();
-        return descendant;
-    }
-
-    @Override
-    Node copy() {
-        if (descendant == null) throw new InvalidNodeException("Copying a negation without descendant");
-        return NegNode.negate(descendant.copy());
     }
 
     @Override
@@ -113,4 +116,5 @@ public class NegNode extends SingletonNode {
     public boolean isTrue() {
         return !descendant.isTrue();
     }
+
 }

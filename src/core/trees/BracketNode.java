@@ -4,6 +4,7 @@ import core.exceptions.InvalidInsertionException;
 import core.symbols.Literal;
 import core.symbols.Symbol;
 
+import java.util.List;
 import java.util.Set;
 
 import static core.symbols.Symbol.LBRACKET;
@@ -22,11 +23,6 @@ public class BracketNode extends Node {
     }
 
     @Override
-    public Node toCNF() {
-        return null;
-    }
-
-    @Override
     void addLiterals(Set<Literal> literals) {
         head.addLiterals(literals);
     }
@@ -38,31 +34,9 @@ public class BracketNode extends Node {
 
     @Override
     Node _removeRedundantBrackets(int parent_precedence) {
-        head = head._removeRedundantBrackets(getPrecedence());
+        head = head._removeRedundantBrackets(parent_precedence);
         if (head.getPrecedence() <= parent_precedence) return head;
         else return this;
-
-        // remove duplicate bracket
-//        while (head instanceof BracketNode) {
-//            head = ((BracketNode) head).head;
-//        }
-
-//        // if inner node contains bracket, negation and literal only then remove this bracket
-//        // (~~(~a)) == ~~~a, (~a) == ~a etc...
-//        Node look_ahead = head;
-//        boolean remove_this = false;
-//        while (true) {
-//            if (look_ahead instanceof LitNode) {
-//                remove_this = true;
-//                break;
-//            } else if (look_ahead instanceof NegNode) {
-//                look_ahead = ((NegNode) look_ahead).descendant;
-//            } else if (look_ahead instanceof BracketNode) {
-//                look_ahead = ((BracketNode) look_ahead).head;
-//            } else {
-//                break;
-//            }
-//        }
     }
 
     static BracketNode bracket(Node node) {
@@ -148,6 +122,15 @@ public class BracketNode extends Node {
                 .append(LBRACKET)
                 .append(head_sb)
                 .append(RBRACKET);
+    }
+
+    @Override
+    Node _toCNF(List<Node> clauses) {
+        head = head._toCNF(clauses);
+        // terminate this bracket because no need for bracket around ... /\ ...
+        // we can safely append another cnf form at the left or right: ... /\ ... /\ ... /\ ...
+        // it does not matter
+        return head;
     }
 
     private void ensureComplete() {

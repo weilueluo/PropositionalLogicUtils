@@ -5,6 +5,7 @@ import core.exceptions.InvalidNodeException;
 import core.symbols.Literal;
 import core.symbols.Symbol;
 
+import java.util.List;
 import java.util.Set;
 
 public class LitNode extends BinaryNode {
@@ -39,8 +40,9 @@ public class LitNode extends BinaryNode {
     }
 
     @Override
-    public Node toCNF() {
-        return null;
+    Node _toCNF(List<Node> clauses) {
+        clauses.add(this);
+        return this;
     }
 
     @Override

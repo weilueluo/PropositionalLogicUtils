@@ -27,7 +27,7 @@ public abstract class Symbol {
     public final static int OR_PRECEDENCE = 4;
     public final static int IMPLIES_PRECEDENCE = 5;
     public final static int IFF_PRECEDENCE = 6;
-    public final static int HIGHEST_PRECEDENCE = 7;
+    public final static int INITIAL_PRECEDENCE = 7;
 
     public Symbol() {
     } // empty
