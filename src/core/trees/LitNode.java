@@ -41,6 +41,7 @@ public class LitNode extends BinaryNode {
 
     @Override
     Node _toCNF(List<Node> clauses) {
+        clauses.clear();
         clauses.add(this);
         return this;
     }

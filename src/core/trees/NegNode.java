@@ -88,6 +88,7 @@ public class NegNode extends SingletonNode {
 
     @Override
     Node _toCNF(List<Node> clauses) {
+        clauses.clear();
         clauses.add(this);
         return this;
     }

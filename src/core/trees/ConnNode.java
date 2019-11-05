@@ -4,7 +4,6 @@ import core.exceptions.InvalidInsertionException;
 import core.exceptions.InvalidNodeException;
 import core.symbols.Connective;
 import core.symbols.Literal;
-import jdk.dynalink.NamedOperation;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -196,6 +195,10 @@ public class ConnNode extends BinaryNode {
         left = left instanceof BracketNode ? ((BracketNode) left).head : left;
         right = right instanceof BracketNode ? ((BracketNode) right).head : right;
 
+        // we dont care about whats inside previously
+        // as long as clauses contains clauses of this node when return
+        clauses.clear();
+
         // both side are literal or ~literal
         // a /\ b || a \/ b || ~a \/ b || ~a /\ b || a /\ ~b || a \/ ~b || ~a \/ ~b || ~a /\ ~b
         if ((left instanceof NegNode || left instanceof LitNode) &&
@@ -213,29 +216,21 @@ public class ConnNode extends BinaryNode {
         }
 
         // at least one side is connective
-
-        if (type == AND) {  // ... /\ ...
-            left = left._toCNF(clauses);
-            right = right._toCNF(clauses);
-            return handleCNF_AND();
-        }
-
-
-        // ... \/ ...
-        // distributivity law needed
-
         List<Node> left_clauses = new ArrayList<>();
         List<Node> right_clauses = new ArrayList<>();
         left = left._toCNF(left_clauses);
         right = right._toCNF(right_clauses);
 
-        Node converted_tree;  // the tree to return
-
-        converted_tree = handleCNF_OR(left_clauses, right_clauses);
-
-        clauses.addAll(left_clauses);
-        clauses.addAll(right_clauses);
-        return converted_tree;
+        if (type == AND) {
+            // ... /\ ...
+            clauses.addAll(left_clauses);
+            clauses.addAll(right_clauses);
+            return _handleCNF_AND();
+        } else {
+            // ... \/ ...
+            // distributivity law needed
+            return handleCNF_OR(clauses, left_clauses, right_clauses);
+        }
     }
 
     @Override
@@ -277,7 +272,7 @@ public class ConnNode extends BinaryNode {
                 .append(right.toStringBuilder());
     }
 
-    private Node handleCNF_AND() {
+    private Node _handleCNF_AND() {
         // left and right should not be literal at the same time
         // neither left nor right is bracket node
         // negation node must follow by literal node
@@ -338,7 +333,7 @@ public class ConnNode extends BinaryNode {
         return this;
     }
 
-    private Node handleCNF_OR(List<Node> left_clauses, List<Node> right_clauses) {
+    private Node handleCNF_OR(List<Node> clauses, List<Node> left_clauses, List<Node> right_clauses) {
         // left and right should not be literal at the same time
         // neither left nor right is bracket node
         // negation node must follow by literal node
@@ -358,14 +353,16 @@ public class ConnNode extends BinaryNode {
             if (conn_node.type == OR) {
                 // p \/ q \/ r
                 // already in cnf
+                clauses.addAll(left_clauses);
+                clauses.addAll(right_clauses);
                 return this;
             } else {
                 // p \/ (q /\ r) || (q /\ r) \/ p
                 // distribute
                 if (left_is_literal) {
-                    return _cnf_distribute(left_clauses, right_clauses);
+                    return _cnf_distribute(clauses, left_clauses, right_clauses);
                 } else {
-                    return _cnf_distribute(right_clauses, left_clauses);
+                    return _cnf_distribute(clauses, right_clauses, left_clauses);
                 }
             }  // if (conn_node.type == OR)
         }
@@ -374,7 +371,9 @@ public class ConnNode extends BinaryNode {
         ConnNode left_conn_node = (ConnNode) left;
         ConnNode right_conn_node = (ConnNode) right;
         if (left_conn_node.type == OR && right_conn_node.type == OR) {
-            // p \/ q \/ r \/ t
+            // p \/ q \/ r \/ t, already in cnf
+            clauses.addAll(left_clauses);
+            clauses.addAll(right_clauses);
             return this;
         }
 
@@ -387,7 +386,7 @@ public class ConnNode extends BinaryNode {
             for (Node clause : left_clauses) {
                 List<Node> one_clause_list = new ArrayList<>();
                 one_clause_list.add(clause);
-                Node cnf_distributed_node = _cnf_distribute(one_clause_list, right_clauses);
+                Node cnf_distributed_node = _cnf_distribute(clauses, one_clause_list, right_clauses);
                 cnf_distributed_nodes.add(cnf_distributed_node);
             }
             return _AND_link(cnf_distributed_nodes);
@@ -397,14 +396,14 @@ public class ConnNode extends BinaryNode {
         // /\ clauses distribute to \/ clauses
         Node cnf_node;
         if (left_conn_node.type == AND) {
-            cnf_node = _cnf_distribute(left_clauses, right_clauses);
+            cnf_node = _cnf_distribute(clauses, left_clauses, right_clauses);
         } else {
-            cnf_node = _cnf_distribute(right_clauses, left_clauses);
+            cnf_node = _cnf_distribute(clauses, right_clauses, left_clauses);
         }
         return cnf_node;
     }
 
-    private Node _cnf_distribute(List<Node> distributor, List<Node> receiver) {
+    private Node _cnf_distribute(List<Node> clauses, List<Node> distributor, List<Node> receiver) {
         List<Node> last_received_nodes = receiver;
         for (Node distribute_node : distributor) {
             List<Node> curr_received_nodes = new ArrayList<>();
@@ -415,6 +414,8 @@ public class ConnNode extends BinaryNode {
         }
 
         // now all receive nodes are updated to have distribute nodes
+        // update clauses
+        clauses.addAll(last_received_nodes);
         // link them by AND
         return _AND_link(last_received_nodes);
     }

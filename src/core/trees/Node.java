@@ -26,11 +26,11 @@ public abstract class Node implements NodeInsertion, TruthValue {
 
     public static void main(String[] args) {
         var parser = new TruthTable();
-//        parser.evaluate("(a /\\ (~b -> a) <-> c \\/ b -> ~a /\\ (c <-> a)) \\/ ~b");
+        parser.evaluate("(a /\\ (~b -> a) <-> c \\/ b -> ~a /\\ (c <-> a)) \\/ ~b");
         //        parser.evaluate("(~((a)) \\/ (~~c)) /\\ ((((b \\/ (~~(~~(c -> a)))))))");
-                parser.evaluate("(e /\\ c \\/ a /\\ d)");
-        System.out.println("Before");
-        System.out.println(parser.getTree().toTreeString());
+//                parser.evaluate("(e /\\ c \\/ a /\\ d)");
+        System.out.println("Original: " + parser.getTree());
+        System.out.println(parser.generate());
 //        System.out.println(parser.generate());
 //
 //
@@ -46,8 +46,9 @@ public abstract class Node implements NodeInsertion, TruthValue {
         var start = Instant.now();
         Pair<Node, List<Node>> node_and_clauses = parser.getTree().toCNF();
         var end = Instant.now();
-        System.out.println("CNF:");
-        System.out.println(node_and_clauses.getItem1());
+        System.out.println("CNF: " + node_and_clauses.getItem1());
+        parser.evaluate(node_and_clauses.getItem1().toString());
+        System.out.println(parser.generate());
         System.out.println("Clauses:");
         for (Node node : node_and_clauses.getItem2()) {
             System.out.println(node);
@@ -137,7 +138,6 @@ public abstract class Node implements NodeInsertion, TruthValue {
         cnf_node.eliminateArrows();
         cnf_node = cnf_node._pushNegations();
         cnf_node = cnf_node._removeRedundantBrackets(Symbol.INITIAL_PRECEDENCE);
-        System.out.println(cnf_node);
         cnf_node = cnf_node._toCNF(clauses)._removeRedundantBrackets(Symbol.INITIAL_PRECEDENCE);
         return new Pair<>(cnf_node, clauses);
     }

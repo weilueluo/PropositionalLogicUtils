@@ -93,7 +93,7 @@ public class Parser {
         return literals;
     }
 
-    public void evaluate(String s) throws InvalidFormulaException {
+    public Parser evaluate(String s) throws InvalidFormulaException {
         if (s == null) {
             throw new InvalidFormulaException("Propositional Logic formula can't be null");
         }
@@ -147,6 +147,7 @@ public class Parser {
         }
         evaluated_node = curr_node.getHead();  // remove outer bracket
         literals = literalPool.toArray(new Literal[0]);
+        return this;
     }
 
     public String toString() {
