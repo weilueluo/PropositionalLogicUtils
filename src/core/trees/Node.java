@@ -24,39 +24,6 @@ public abstract class Node implements NodeInsertion, TruthValue {
         value = v;
     }
 
-    public static void main(String[] args) {
-        var parser = new TruthTable();
-        parser.evaluate("(a /\\ (~b -> a) <-> c \\/ b -> ~a /\\ (c <-> a)) \\/ ~b");
-        //        parser.evaluate("(~((a)) \\/ (~~c)) /\\ ((((b \\/ (~~(~~(c -> a)))))))");
-//                parser.evaluate("(e /\\ c \\/ a /\\ d)");
-        System.out.println("Original: " + parser.getTree());
-        System.out.println(parser.generate());
-//        System.out.println(parser.generate());
-//
-//
-//        parser.evaluate(parser.getTree()
-//                .eliminateArrows()
-//                .pushNegations()
-//                .removeRedundantBrackets());
-//
-//        System.out.println("After");
-//        System.out.println(parser.getTree());
-//        System.out.println(parser.generate());
-
-        var start = Instant.now();
-        Pair<Node, List<Node>> node_and_clauses = parser.getTree().toCNF();
-        var end = Instant.now();
-        System.out.println("CNF: " + node_and_clauses.getItem1());
-        parser.evaluate(node_and_clauses.getItem1().toString());
-        System.out.println(parser.generate());
-        System.out.println("Clauses:");
-        for (Node node : node_and_clauses.getItem2()) {
-            System.out.println(node);
-        }
-        System.out.println("Runtime: " + Duration.between(start, end).toMillis() + "ms");
-
-    }
-
     /**
      * @return a new tree after removing redundant brackets of this tree.
      */
