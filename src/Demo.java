@@ -13,7 +13,7 @@ public class Demo {
         var truth_table = new TruthTable();
 //        truth_table.evaluate("(a /\\ (~b -> a) <-> c \\/ b -> ~a /\\ (c <-> a)) \\/ ~b");
 //          truth_table.evaluate("(~((a)) \\/ (~~c)) /\\ ((((b \\/ (~~(~~(c -> a)))))))");
-        truth_table.evaluate("(a -> b /\\ ~c \\/ ~b) <-> a -> c /\\ ~(c /\\ ((~a))) -> ~~~~((a)) /\\ (~(~~(~c)))");
+        truth_table.evaluate("~~~(a -> b /\\ ~c \\/ ~b) <-> a -> c /\\ ~(c /\\ ((~a))) -> ~~~~((a)) /\\ (~(~~(~c)))");
         System.out.println("Original: " + truth_table.getTree());
         System.out.println("Original Truth Table:");
         System.out.println(truth_table.generate());

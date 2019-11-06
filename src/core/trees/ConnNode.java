@@ -2,6 +2,7 @@ package core.trees;
 
 import core.exceptions.InvalidInsertionException;
 import core.exceptions.InvalidNodeException;
+import core.exceptions.InvalidSymbolException;
 import core.symbols.Connective;
 import core.symbols.Literal;
 
@@ -55,10 +56,6 @@ public class ConnNode extends BinaryNode {
         this.type = new_conn.getType();
     }
 
-    private void ensureLeftNotNull() {
-        if (left == null) throw new InvalidNodeException("Left Node for a connective node should not be null");
-    }
-
     private void ensureFullNode() {
         if (left == null || right == null) {
             throw new InvalidNodeException("Connective node is incomplete");
@@ -69,8 +66,9 @@ public class ConnNode extends BinaryNode {
 
     @Override
     public Node insert(LitNode node) {
-        ensureLeftNotNull();
-        if (right == null) {
+        if (left == null) {
+            left = node;
+        } else if (right == null) {
             right = node;
         } else {
             right = right.insert(node);
@@ -80,8 +78,9 @@ public class ConnNode extends BinaryNode {
 
     @Override
     public Node insert(BracketNode node) {
-        ensureLeftNotNull();
-        if (right == null) {
+        if (left == null) {
+            left = node;
+        } else if (right == null) {
             right = node;
         } else {
             right = right.insert(node);
@@ -91,8 +90,9 @@ public class ConnNode extends BinaryNode {
 
     @Override
     public Node insert(ConnNode node) {
-        ensureLeftNotNull();
-        if (node.getPrecedence() >= this.getPrecedence()) {
+        if (left  == null) {
+            throw new InvalidInsertionException("Inserting connective immediately before connective");
+        } else if (node.getPrecedence() >= this.getPrecedence()) {
             node.left = this;
             return node;
         } else {
@@ -107,8 +107,8 @@ public class ConnNode extends BinaryNode {
 
     @Override
     public Node insert(NegNode node) {
-        ensureLeftNotNull();
-        if (right == null) right = node;
+        if (left == null) throw new InvalidInsertionException("Inserting Negation immediately before connective");
+        else if (right == null) right = node;
         else right.insert(node);
         return this;
     }
@@ -127,6 +127,38 @@ public class ConnNode extends BinaryNode {
                 return !left.isTrue() || right.isTrue();
             default:
                 throw new IllegalStateException("Unrecognised Connective Type");
+        }
+    }
+
+    @Override
+    public boolean isTautology() {
+        switch(type) {
+            case OR:
+                return left.isTautology() || right.isTautology();
+            case IMPLIES:
+                return left.isContradiction() || right.isTautology();
+            case IFF:
+                return left.isTautology() && right.isTautology() || left.isContradiction() && right.isContradiction();
+            case AND:
+                return left.isTautology() && right.isTautology();
+            default:
+                throw new InvalidSymbolException("Unrecognised connective type");
+        }
+    }
+
+    @Override
+    public boolean isContradiction() {
+        switch(type) {
+            case OR:
+                return left.isContradiction() && right.isContradiction();
+            case IMPLIES:
+                return left.isTautology() && right.isContradiction();
+            case IFF:
+                return left.isTautology() && right.isContradiction() || left.isContradiction() && right.isTautology();
+            case AND:
+                return left.isContradiction() || right.isContradiction();
+            default:
+                throw new InvalidSymbolException("Unrecognised connective type");
         }
     }
 

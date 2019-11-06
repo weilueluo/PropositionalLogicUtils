@@ -82,6 +82,16 @@ public class LitNode extends BinaryNode {
     }
 
     @Override
+    public boolean isTautology() {
+        return literal.isTautology();
+    }
+
+    @Override
+    public boolean isContradiction() {
+        return literal.isContradiction();
+    }
+
+    @Override
     Node copy() {
         return this;  // literal with the same name always refer to the same literal
     }

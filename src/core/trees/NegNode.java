@@ -15,6 +15,16 @@ public class NegNode extends SingletonNode {
         super(value);
     }
 
+    @Override
+    public boolean isTautology() {
+        return descendant.isContradiction();
+    }
+
+    @Override
+    public boolean isContradiction() {
+        return descendant.isTautology();
+    }
+
     static NegNode negate(Node node) {
         NegNode neg_node = new NegNode(Negation.getInstance());
         neg_node.descendant = node;

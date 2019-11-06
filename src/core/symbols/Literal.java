@@ -9,12 +9,23 @@ import java.util.Objects;
 
 public class Literal extends Symbol {
 
+    private final static Literal tautology = Literal.newInstance("T");
+    private final static Literal contradiction = Literal.newInstance("F");
+
     private String rawLiteral;
     private boolean isNegated;
     private Boolean rawLiteralTruthValue, isRawTautology;
     private int hashcode;
 
     private final static HashMap<Integer, Literal> created_instances = new HashMap<>();
+
+    public static Literal getTautology() {
+        return tautology;
+    }
+
+    public static Literal getContradiction() {
+        return contradiction;
+    }
 
     private Literal() {
     } // empty private constructor

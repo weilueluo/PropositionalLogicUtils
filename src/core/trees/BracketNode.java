@@ -23,6 +23,16 @@ public class BracketNode extends Node {
     }
 
     @Override
+    public boolean isTautology() {
+        return head.isTautology();
+    }
+
+    @Override
+    public boolean isContradiction() {
+        return head.isContradiction();
+    }
+
+    @Override
     void addLiterals(Set<Literal> literals) {
         head.addLiterals(literals);
     }
