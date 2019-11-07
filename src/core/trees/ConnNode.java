@@ -6,10 +6,7 @@ import core.exceptions.InvalidSymbolException;
 import core.symbols.Connective;
 import core.symbols.Literal;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static core.symbols.Connective.Type.AND;
 import static core.symbols.Connective.Type.OR;
@@ -26,7 +23,7 @@ public class ConnNode extends BinaryNode {
         this.type = conn.getType();
     }
 
-    static ConnNode connect(Connective.Type conn_type, Node left, Node right) {
+    public static ConnNode connect(Connective.Type conn_type, Node left, Node right) {
         ConnNode conn_node = new ConnNode(Connective.getInstance(conn_type));
         conn_node.left = left;
         conn_node.right = right;
@@ -163,9 +160,10 @@ public class ConnNode extends BinaryNode {
     }
 
     @Override
-    Node copy() {
-        ensureFullNode();
-        return ConnNode.connect(type, left.copy(), right.copy());
+    public Node copy() {
+        return ConnNode.connect(type,
+                left == null ? null : left.copy(),
+                right == null ? null : right.copy());
     }
 
     @Override
@@ -302,6 +300,16 @@ public class ConnNode extends BinaryNode {
                 .append(value.getFull())
                 .append(' ')
                 .append(right.toStringBuilder());
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (!(other instanceof ConnNode)) return false;
+
+        ConnNode node = (ConnNode) other;
+        if (node.type != type) return false;
+
+        return Objects.equals(left, node.left) && Objects.equals(right, node.right);
     }
 
     private Node _handleCNF_AND() {

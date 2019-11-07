@@ -49,7 +49,7 @@ public class BracketNode extends Node {
         else return this;
     }
 
-    static BracketNode bracket(Node node) {
+    public static BracketNode bracket(Node node) {
         BracketNode bracket_node = new BracketNode();
         bracket_node.head = node;
         bracket_node.close();
@@ -107,6 +107,7 @@ public class BracketNode extends Node {
 
     public void close() {
         if (isClosed()) throw new IllegalStateException("This bracket node is already closed");
+        else if (head == null) throw new IllegalStateException("Closing an empty bracket");
         else closed = true;
     }
 
@@ -168,7 +169,7 @@ public class BracketNode extends Node {
     }
 
     @Override
-    Node copy() {
+    public Node copy() {
         ensureComplete();
         return BracketNode.bracket(head.copy());
     }
@@ -180,6 +181,12 @@ public class BracketNode extends Node {
                 .append(LBRACKET)
                 .append(head_sb)
                 .append(RBRACKET);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (!(other instanceof BracketNode)) return false;
+        else return head.equals(((BracketNode) other).getHead());
     }
 
     @Override

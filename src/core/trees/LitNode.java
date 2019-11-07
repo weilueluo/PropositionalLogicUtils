@@ -92,13 +92,19 @@ public class LitNode extends BinaryNode {
     }
 
     @Override
-    Node copy() {
+    public Node copy() {
         return this;  // literal with the same name always refer to the same literal
     }
 
     @Override
     StringBuilder toStringBuilder() {
         return new StringBuilder(literal.getFull());
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (!(other instanceof LitNode)) return false;
+        else return ((LitNode) other).literal.equals(literal);
     }
 
     @Override

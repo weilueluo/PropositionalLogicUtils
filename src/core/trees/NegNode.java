@@ -7,6 +7,7 @@ import core.symbols.Negation;
 import core.symbols.Symbol;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 public class NegNode extends SingletonNode {
@@ -25,7 +26,7 @@ public class NegNode extends SingletonNode {
         return descendant.isTautology();
     }
 
-    static NegNode negate(Node node) {
+    public static NegNode negate(Node node) {
         NegNode neg_node = new NegNode(Negation.getInstance());
         neg_node.descendant = node;
         return neg_node;
@@ -60,9 +61,8 @@ public class NegNode extends SingletonNode {
     }
 
     @Override
-    Node copy() {
-        if (descendant == null) throw new InvalidNodeException("Copying a negation without descendant");
-        return NegNode.negate(descendant.copy());
+    public Node copy() {
+        return NegNode.negate(descendant == null ? null : descendant.copy());
     }
 
     @Override
@@ -121,6 +121,15 @@ public class NegNode extends SingletonNode {
     @Override
     StringBuilder toStringBuilder() {
         return new StringBuilder().append(Symbol.NEG).append(descendant.toStringBuilder());
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (other instanceof NegNode) {
+            NegNode node = (NegNode) other;
+            return Objects.equals(node.descendant, descendant);
+        }
+        else return false;
     }
 
     @Override

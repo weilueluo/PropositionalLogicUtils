@@ -18,11 +18,11 @@ import static core.symbols.Connective.Type.AND;
 public abstract class Node implements NodeInsertion, TruthValue {
     Symbol value;
 
-    protected Node() {
+    Node() {
         this(null);
     }
 
-    protected Node(Symbol v) {
+    Node(Symbol v) {
         value = v;
     }
 
@@ -61,7 +61,7 @@ public abstract class Node implements NodeInsertion, TruthValue {
     /**
      * @return a deep copy of this node, everything except Literal are new instances
      */
-    abstract Node copy();  // this return a deep copy
+    public abstract Node copy();  // this return a deep copy
 
     // internal method which may alter the existing tree
     abstract Node _removeRedundantBrackets(int parent_precedent);
@@ -112,6 +112,7 @@ public abstract class Node implements NodeInsertion, TruthValue {
         cnf_node = cnf_node._pushNegations();
         cnf_node = cnf_node._removeRedundantBrackets(Symbol.INITIAL_PRECEDENCE);
         cnf_node = cnf_node._toCNF(clauses);
+
         return new Pair<>(cnf_node, clauses);
     }
 
@@ -138,6 +139,7 @@ public abstract class Node implements NodeInsertion, TruthValue {
 
         }
         // TODO
+        return null;
     }
 
     // internal method
@@ -179,5 +181,8 @@ public abstract class Node implements NodeInsertion, TruthValue {
     }
 
     abstract StringBuilder toStringBuilder();
+
+    @Override
+    public abstract boolean equals(Object other);  // structure-ly equals
 
 }
