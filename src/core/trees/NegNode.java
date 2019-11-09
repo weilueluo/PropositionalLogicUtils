@@ -1,7 +1,6 @@
 package core.trees;
 
 import core.exceptions.InvalidInsertionException;
-import core.exceptions.InvalidNodeException;
 import core.symbols.Literal;
 import core.symbols.Negation;
 import core.symbols.Symbol;
@@ -18,12 +17,16 @@ public class NegNode extends SingletonNode {
 
     @Override
     public boolean isTautology() {
-        return descendant.isContradiction();
+        // DO NOT: return !descendant.isTautology()
+        // a normal literal is neither contradiction nor tautology
+        return descendant != null && descendant.isContradiction();
     }
 
     @Override
     public boolean isContradiction() {
-        return descendant.isTautology();
+        // DO NOT: return !descendant.isContradiction()
+        // a normal literal is neither contradiction nor tautology
+        return descendant != null && descendant.isTautology();
     }
 
     public static NegNode negate(Node node) {
@@ -104,8 +107,8 @@ public class NegNode extends SingletonNode {
     }
 
     @Override
-    void addLiterals(Set<Literal> literals) {
-        descendant.addLiterals(literals);
+    void _addLiterals(Set<Literal> literals) {
+        descendant._addLiterals(literals);
     }
 
     @Override
@@ -120,7 +123,7 @@ public class NegNode extends SingletonNode {
 
     @Override
     StringBuilder toStringBuilder() {
-        return new StringBuilder().append(Symbol.NEG).append(descendant.toStringBuilder());
+        return new StringBuilder().append(Symbol.NEG).append(descendant == null ? "" : descendant.toStringBuilder());
     }
 
     @Override

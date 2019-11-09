@@ -47,7 +47,7 @@ public class LitNode extends BinaryNode {
     }
 
     @Override
-    void addLiterals(Set<Literal> literals) {
+    void _addLiterals(Set<Literal> literals) {
         literals.add(literal);
     }
 
@@ -93,7 +93,7 @@ public class LitNode extends BinaryNode {
 
     @Override
     public Node copy() {
-        return this;  // literal with the same name always refer to the same literal
+        return new LitNode(literal);
     }
 
     @Override

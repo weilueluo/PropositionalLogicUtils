@@ -33,8 +33,8 @@ public class BracketNode extends Node {
     }
 
     @Override
-    void addLiterals(Set<Literal> literals) {
-        head.addLiterals(literals);
+    void _addLiterals(Set<Literal> literals) {
+        head._addLiterals(literals);
     }
 
     @Override
@@ -123,7 +123,7 @@ public class BracketNode extends Node {
                 .append(LBRACKET).append(System.lineSeparator())
                 .append(head_sb)
                 .append(spaces)
-                .append(RBRACKET).append(System.lineSeparator());
+                .append(isClosed() ? RBRACKET + System.lineSeparator() : "");
     }
 
     @Override
@@ -132,7 +132,7 @@ public class BracketNode extends Node {
         return new StringBuilder()
                 .append(LBRACKET)
                 .append(head_sb)
-                .append(RBRACKET);
+                .append(isClosed() ? RBRACKET : "");
     }
 
     @Override
@@ -180,7 +180,7 @@ public class BracketNode extends Node {
         return new StringBuilder()
                 .append(LBRACKET)
                 .append(head_sb)
-                .append(RBRACKET);
+                .append(isClosed() ? RBRACKET : "");
     }
 
     @Override

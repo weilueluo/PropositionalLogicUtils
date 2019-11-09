@@ -1,12 +1,9 @@
 package core.trees;
 
-import core.TruthTable;
 import core.common.Pair;
 import core.symbols.Literal;
 import core.symbols.Symbol;
 
-import java.time.Duration;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -153,11 +150,11 @@ public abstract class Node implements NodeInsertion, TruthValue {
      */
     public Set<Literal> getLiterals() {
         Set<Literal> literals = new HashSet<>();
-        addLiterals(literals);
+        _addLiterals(literals);
         return literals;
     }
 
-    abstract void addLiterals(Set<Literal> literals);
+    abstract void _addLiterals(Set<Literal> literals);
 
     abstract int getPrecedence();
 

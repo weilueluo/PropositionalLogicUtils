@@ -159,6 +159,7 @@ public class ConnNode extends BinaryNode {
         }
     }
 
+    // if left and right are null, this method may return the same instance for unknown reason
     @Override
     public Node copy() {
         return ConnNode.connect(type,
@@ -264,9 +265,9 @@ public class ConnNode extends BinaryNode {
     }
 
     @Override
-    void addLiterals(Set<Literal> literals) {
-        left.addLiterals(literals);
-        right.addLiterals(literals);
+    void _addLiterals(Set<Literal> literals) {
+        left._addLiterals(literals);
+        right._addLiterals(literals);
     }
 
     @Override
@@ -295,11 +296,11 @@ public class ConnNode extends BinaryNode {
     @Override
     StringBuilder toStringBuilder() {
         return new StringBuilder()
-                .append(left.toStringBuilder())
+                .append(left == null ? "" : left.toStringBuilder())
                 .append(' ')
                 .append(value.getFull())
                 .append(' ')
-                .append(right.toStringBuilder());
+                .append(right == null ? "" : right.toStringBuilder());
     }
 
     @Override
