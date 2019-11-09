@@ -1,6 +1,11 @@
 package core.trees;
 
 import core.exceptions.InvalidInsertionException;
+import core.symbols.Literal;
+import core.symbols.Symbol;
+
+import java.util.List;
+import java.util.Set;
 
 import static core.symbols.Symbol.LBRACKET;
 import static core.symbols.Symbol.RBRACKET;
@@ -15,6 +20,44 @@ public class BracketNode extends Node {
         head = null;
         closed = false;
         this.value = null;
+    }
+
+    @Override
+    public boolean isTautology() {
+        return head.isTautology();
+    }
+
+    @Override
+    public boolean isContradiction() {
+        return head.isContradiction();
+    }
+
+    @Override
+    void _addLiterals(Set<Literal> literals) {
+        head._addLiterals(literals);
+    }
+
+    @Override
+    int getPrecedence() {
+        return Symbol.BRACKET_PRECEDENCE;
+    }
+
+    @Override
+    Node _removeRedundantBrackets(int parent_precedence) {
+        head = head._removeRedundantBrackets(parent_precedence);
+        if (head.getPrecedence() <= parent_precedence) return head;
+        else return this;
+    }
+
+    public static BracketNode bracket(Node node) {
+        BracketNode bracket_node = new BracketNode();
+        bracket_node.head = node;
+        bracket_node.close();
+        return bracket_node;
+    }
+
+    public Node getHead() {
+        return head;
     }
 
     @Override
@@ -64,6 +107,7 @@ public class BracketNode extends Node {
 
     public void close() {
         if (isClosed()) throw new IllegalStateException("This bracket node is already closed");
+        else if (head == null) throw new IllegalStateException("Closing an empty bracket");
         else closed = true;
     }
 
@@ -79,7 +123,7 @@ public class BracketNode extends Node {
                 .append(LBRACKET).append(System.lineSeparator())
                 .append(head_sb)
                 .append(spaces)
-                .append(RBRACKET).append(System.lineSeparator());
+                .append(isClosed() ? RBRACKET + System.lineSeparator() : "");
     }
 
     @Override
@@ -88,7 +132,16 @@ public class BracketNode extends Node {
         return new StringBuilder()
                 .append(LBRACKET)
                 .append(head_sb)
-                .append(RBRACKET);
+                .append(isClosed() ? RBRACKET : "");
+    }
+
+    @Override
+    Node _toCNF(List<Node> clauses) {
+        head = head._toCNF(clauses);
+        // terminate this bracket because no need for bracket around ... /\ ...
+        // we can safely append another cnf form at the left or right: ... /\ ... /\ ... /\ ...
+        // it does not matter
+        return head;
     }
 
     private void ensureComplete() {
@@ -97,34 +150,43 @@ public class BracketNode extends Node {
     }
 
     @Override
-    protected void eliminateArrows() {
+    public void _eliminateArrows() {
         ensureComplete();
-        head.eliminateArrows();
+        head._eliminateArrows();
     }
 
     @Override
-    protected Node invertNegation() {
+    Node _invertNegation() {
         ensureComplete();
-        head = head.invertNegation();
+        head = head._invertNegation();
         return this;
     }
 
     @Override
-    protected Node copy() {
-        ensureComplete();
-        BracketNode new_node = new BracketNode();
-        new_node.head = head.copy();
-        new_node.close();
-        return new_node;
+    Node _pushNegations() {
+        head = head._pushNegations();
+        return this;
     }
 
     @Override
-    protected StringBuilder toStringBuilder() {
+    public Node copy() {
+        ensureComplete();
+        return BracketNode.bracket(head.copy());
+    }
+
+    @Override
+    StringBuilder toStringBuilder() {
         StringBuilder head_sb = head == null ? new StringBuilder() : head.toStringBuilder();
         return new StringBuilder()
                 .append(LBRACKET)
                 .append(head_sb)
-                .append(RBRACKET);
+                .append(isClosed() ? RBRACKET : "");
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (!(other instanceof BracketNode)) return false;
+        else return head.equals(((BracketNode) other).getHead());
     }
 
     @Override

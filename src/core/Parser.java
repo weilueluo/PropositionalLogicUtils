@@ -4,10 +4,7 @@ import core.exceptions.InvalidFormulaException;
 import core.symbols.Connective;
 import core.symbols.Literal;
 import core.symbols.Negation;
-import core.trees.BracketNode;
-import core.trees.ConnNode;
-import core.trees.LitNode;
-import core.trees.NegNode;
+import core.trees.*;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -38,6 +35,7 @@ public class Parser {
 
     private int index;  // current index
     private Stack<BracketNode> bracket_nodes_stack;  // for checking valid brackets
+    private Node evaluated_node;
     private BracketNode curr_node;
     private boolean incomplete_clause;  // a flag to check if parsing stopped half way of a complete clause
     private String unprocessed_str;  // user input string
@@ -71,15 +69,21 @@ public class Parser {
         chars = unprocessed_str == null ? null : unprocessed_str.toCharArray();
         literalPool = new HashSet<>();
         literals = null;
+        evaluated_node = null;
     }
 
-    public BracketNode getTree() {
+    public Node getTree() {
         ensureEvaluated();
-        return curr_node;
+        return evaluated_node;
+    }
+
+    public void evaluate(Node tree) {
+        if (tree == null) throw new IllegalArgumentException("Given new tree is null");
+        evaluate(tree.toString());
     }
 
     void ensureEvaluated() {
-        if (curr_node == null) {
+        if (evaluated_node == null) {
             throw new IllegalStateException("There is no tree/literal before evaluate is called");
         }
     }
@@ -89,7 +93,7 @@ public class Parser {
         return literals;
     }
 
-    public void evaluate(String s) throws InvalidFormulaException {
+    public Parser evaluate(String s) throws InvalidFormulaException {
         if (s == null) {
             throw new InvalidFormulaException("Propositional Logic formula can't be null");
         }
@@ -141,8 +145,9 @@ public class Parser {
         if (!bracket_nodes_stack.empty()) {
             handle_error("Unclosed opening bracket");
         }
-        curr_node.close();
+        evaluated_node = curr_node.getHead();  // remove outer bracket
         literals = literalPool.toArray(new Literal[0]);
+        return this;
     }
 
     public String toString() {

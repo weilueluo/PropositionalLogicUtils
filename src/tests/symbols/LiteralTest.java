@@ -1,4 +1,4 @@
-package tests;
+package tests.symbols;
 
 import core.exceptions.InvalidSymbolException;
 import core.symbols.Literal;

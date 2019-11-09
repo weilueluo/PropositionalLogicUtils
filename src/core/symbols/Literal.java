@@ -9,12 +9,24 @@ import java.util.Objects;
 
 public class Literal extends Symbol {
 
+    private final static HashMap<Integer, Literal> created_instances = new HashMap<>();
+
+    private final static Literal tautology = Literal.newInstance("T");
+    private final static Literal contradiction = Literal.newInstance("F");
+
     private String rawLiteral;
     private boolean isNegated;
     private Boolean rawLiteralTruthValue, isRawTautology;
     private int hashcode;
 
-    private final static HashMap<Integer, Literal> created_instances = new HashMap<>();
+
+    public static Literal getTautology() {
+        return tautology;
+    }
+
+    public static Literal getContradiction() {
+        return contradiction;
+    }
 
     private Literal() {
     } // empty private constructor
@@ -60,9 +72,11 @@ public class Literal extends Symbol {
      * Complexity is O(n)
      *
      * Note:
-     * The following input will return literals: ~P, P.
+     * The following input will return different literals: ~P, P.
      * But the following inputs will return the same literal instance: P, ((((P)))), ~~P, ~~(((~~P))).
-     * The reason for this: assume Literal P is already created and set to true, when we create
+     *
+     * The reason for this:
+     * Assume Literal P is already created and set to true, when we create
      * another Literal ~P, if we treat them as same literal, then we have to change the old P
      * to be false and return the old Literal P, which is not desired.
      * Does not allow negation is a better option but this implementation match the definition better.
@@ -293,11 +307,11 @@ public class Literal extends Symbol {
     }
 
     @Override
-    public boolean equals(Object other) {
+    public boolean equals(Object other) {  // same iff raw literal is the same
         if (other instanceof Literal) {
             return hashCode() == other.hashCode();
         } else {
-            throw new InvalidSymbolException("Comparing non-Literal to Literal");
+            return false;
         }
     }
 

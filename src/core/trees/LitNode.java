@@ -3,6 +3,10 @@ package core.trees;
 import core.exceptions.InvalidInsertionException;
 import core.exceptions.InvalidNodeException;
 import core.symbols.Literal;
+import core.symbols.Symbol;
+
+import java.util.List;
+import java.util.Set;
 
 public class LitNode extends BinaryNode {
 
@@ -36,29 +40,71 @@ public class LitNode extends BinaryNode {
     }
 
     @Override
+    Node _toCNF(List<Node> clauses) {
+        clauses.clear();
+        clauses.add(this);
+        return this;
+    }
+
+    @Override
+    void _addLiterals(Set<Literal> literals) {
+        literals.add(literal);
+    }
+
+    @Override
+    int getPrecedence() {
+        return Symbol.LITERAL_PRECEDENCE;
+    }
+
+    @Override
+    Node _removeRedundantBrackets(int parent_precedent) {
+        return this;
+    }
+
+    @Override
     public StringBuilder toBracketStringBuilder() {
         return new StringBuilder(value.getFull());
     }
 
     @Override
-    protected void eliminateArrows() {
+    public void _eliminateArrows() {
         // no arrow-like connective in literal
     }
 
     @Override
-    protected Node invertNegation() {
-        literal.invertNegation();
+    Node _invertNegation() {
+        return NegNode.negate(this);
+    }
+
+    @Override
+    Node _pushNegations() {
         return this;
     }
 
     @Override
-    protected Node copy() {
-        return this;  // literal with the same name always refer to the same literal
+    public boolean isTautology() {
+        return literal.isTautology();
     }
 
     @Override
-    protected StringBuilder toStringBuilder() {
+    public boolean isContradiction() {
+        return literal.isContradiction();
+    }
+
+    @Override
+    public Node copy() {
+        return new LitNode(literal);
+    }
+
+    @Override
+    StringBuilder toStringBuilder() {
         return new StringBuilder(literal.getFull());
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (!(other instanceof LitNode)) return false;
+        else return ((LitNode) other).literal.equals(literal);
     }
 
     @Override
